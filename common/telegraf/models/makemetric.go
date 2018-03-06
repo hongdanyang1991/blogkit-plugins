@@ -1,13 +1,13 @@
 package models
 
 import (
-	"log"
+	"github.com/qiniu/log"
 	"math"
 	"strings"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/metric"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/metric"
 )
 
 // makemetric is used by both RunningAggregator & RunningInput

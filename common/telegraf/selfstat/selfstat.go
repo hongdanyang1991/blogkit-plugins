@@ -7,13 +7,13 @@ package selfstat
 
 import (
 	"hash/fnv"
-	"log"
+	"github.com/qiniu/log"
 	"sort"
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/metric"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/metric"
 )
 
 var (

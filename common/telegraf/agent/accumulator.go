@@ -1,11 +1,11 @@
 package agent
 
 import (
-	"log"
+	"github.com/qiniu/log"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/selfstat"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/selfstat"
 )
 
 var (
@@ -25,18 +25,18 @@ type MetricMaker interface {
 
 func NewAccumulator(
 	maker MetricMaker,
-	metrics chan telegraf.Metric,
+	metrics []telegraf.Metric,
 ) *accumulator {
 	acc := accumulator{
 		maker:     maker,
-		metrics:   metrics,
+		Metrics:   metrics,
 		precision: time.Nanosecond,
 	}
 	return &acc
 }
 
 type accumulator struct {
-	metrics chan telegraf.Metric
+	Metrics []telegraf.Metric
 
 	maker MetricMaker
 
@@ -50,7 +50,7 @@ func (ac *accumulator) AddFields(
 	t ...time.Time,
 ) {
 	if m := ac.maker.MakeMetric(measurement, fields, tags, telegraf.Untyped, ac.getTime(t)); m != nil {
-		ac.metrics <- m
+		ac.Metrics = append(ac.Metrics, m)
 	}
 }
 
@@ -61,7 +61,7 @@ func (ac *accumulator) AddGauge(
 	t ...time.Time,
 ) {
 	if m := ac.maker.MakeMetric(measurement, fields, tags, telegraf.Gauge, ac.getTime(t)); m != nil {
-		ac.metrics <- m
+		ac.Metrics = append(ac.Metrics, m)
 	}
 }
 
@@ -72,7 +72,7 @@ func (ac *accumulator) AddCounter(
 	t ...time.Time,
 ) {
 	if m := ac.maker.MakeMetric(measurement, fields, tags, telegraf.Counter, ac.getTime(t)); m != nil {
-		ac.metrics <- m
+		ac.Metrics = append(ac.Metrics, m)
 	}
 }
 
@@ -83,7 +83,7 @@ func (ac *accumulator) AddSummary(
 	t ...time.Time,
 ) {
 	if m := ac.maker.MakeMetric(measurement, fields, tags, telegraf.Summary, ac.getTime(t)); m != nil {
-		ac.metrics <- m
+		ac.Metrics = append(ac.Metrics, m)
 	}
 }
 
@@ -94,7 +94,7 @@ func (ac *accumulator) AddHistogram(
 	t ...time.Time,
 ) {
 	if m := ac.maker.MakeMetric(measurement, fields, tags, telegraf.Histogram, ac.getTime(t)); m != nil {
-		ac.metrics <- m
+		ac.Metrics = append(ac.Metrics, m)
 	}
 }
 

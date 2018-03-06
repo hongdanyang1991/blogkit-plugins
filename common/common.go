@@ -1,4 +1,4 @@
-package internal
+package common
 
 import (
 	"bufio"
@@ -9,7 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
+	"github.com/qiniu/log"
 	"math/big"
 	"os"
 	"os/exec"

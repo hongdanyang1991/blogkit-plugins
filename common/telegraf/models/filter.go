@@ -3,7 +3,7 @@ package models
 import (
 	"fmt"
 
-	"github.com/influxdata/telegraf/filter"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/filter"
 )
 
 // TagFilter is the name of a tag, and the values on which to filter

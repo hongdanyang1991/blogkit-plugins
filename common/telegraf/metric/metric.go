@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/influxdata/telegraf"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf"
 )
 
 const MaxInt = int(^uint(0) >> 1)
