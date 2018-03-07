@@ -13,25 +13,27 @@ import (
 	"github.com/hongdanyang1991/blogkit-plugins/common"
 	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf"
 
-	"github.com/go-sql-driver/mysql"
+	"encoding/json"
 	"flag"
+	"github.com/go-sql-driver/mysql"
 	"github.com/hongdanyang1991/blogkit-plugins/common/conf"
 	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/agent"
 	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/models"
-	"encoding/json"
 	"os"
 )
 
 var mysqlConf = flag.String("f", "plugins/mysql5.1/conf/mysql.conf", "configuration file to load")
 var logPath = "plugins/mysql5.1/log/log_"
+
 //var mysqlConf = flag.String("f", "mysql/mysql.conf", "configuration file to load")
-//var logPath = "mysql/log_"
+//var logPath = "log_"
 
 func main() {
 	newfile := logPath + time.Now().Format("0102") + ".log"
-	file, err := os.OpenFile(newfile, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
+	file, err := os.OpenFile(newfile, os.O_APPEND|os.O_CREATE, 0666)
 	if err != nil {
 		err = fmt.Errorf("rotateLog open newfile %v err %v", newfile, err)
+		log.Error(err)
 		return
 	}
 	log.SetOutput(file)
@@ -42,16 +44,16 @@ func main() {
 		log.Fatal("config.Load failed:", err)
 	}
 	metrics := []telegraf.Metric{}
-	input := models.NewRunningInput(mysql,&models.InputConfig{} )
+	input := models.NewRunningInput(mysql, &models.InputConfig{})
 	acc := agent.NewAccumulator(input, metrics)
 	mysql.Gather(acc)
- 	datas := map[string]interface{}{}
- 	for _, metric := range acc.Metrics {
- 		for k, v := range metric.Fields() {
- 			datas[k] = v
+	datas := map[string]interface{}{}
+	for _, metric := range acc.Metrics {
+		for k, v := range metric.Fields() {
+			datas[k] = v
 		}
 	}
-	data, err:= json.Marshal(datas)
+	data, err := json.Marshal(datas)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -1827,4 +1829,3 @@ func getDSNTag(dsn string) string {
 	}
 	return conf.Addr
 }
-

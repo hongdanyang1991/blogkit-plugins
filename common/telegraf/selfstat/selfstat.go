@@ -6,8 +6,8 @@
 package selfstat
 
 import (
-	"hash/fnv"
 	"github.com/qiniu/log"
+	"hash/fnv"
 	"sort"
 	"sync"
 	"time"
