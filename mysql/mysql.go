@@ -25,44 +25,72 @@ import (
 var mysqlConf = flag.String("f", "plugins/mysql5.1/conf/mysql.conf", "configuration file to load")
 var logPath = "plugins/mysql5.1/log/log_"
 
-//var mysqlConf = flag.String("f", "mysql/mysql.conf", "configuration file to load")
+//var mysqlConf = flag.String("f", "mysql.conf", "configuration file to load")
 //var logPath = "log_"
 
 func main() {
 	newfile := logPath + time.Now().Format("0102") + ".log"
-	file, err := os.OpenFile(newfile, os.O_APPEND|os.O_CREATE, 0666)
+	file, err := os.OpenFile(newfile, os.O_WRONLY|os.O_APPEND|os.O_CREATE, os.ModeAppend)
 	if err != nil {
 		err = fmt.Errorf("rotateLog open newfile %v err %v", newfile, err)
 		log.Error(err)
 		return
 	}
 	log.SetOutput(file)
-
+	log.SetOutputLevel(0)
 	flag.Parse()
 	mysql := &Mysql{}
 	if err := conf.LoadEx(mysql, *mysqlConf); err != nil {
 		log.Fatal("config.Load failed:", err)
 	}
+	log.Info("start collect mysql metric data")
 	metrics := []telegraf.Metric{}
 	input := models.NewRunningInput(mysql, &models.InputConfig{})
 	acc := agent.NewAccumulator(input, metrics)
 	mysql.Gather(acc)
-	datas := map[string]interface{}{}
+	datas := []map[string]interface{}{}
+
+	log.Println(acc.Metrics)
 	for _, metric := range acc.Metrics {
-		for k, v := range metric.Fields() {
-			datas[k] = v
-		}
+		datas = append(datas, metric.Fields())
 	}
 	data, err := json.Marshal(datas)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	log.Println("aaa")
 	fmt.Println(string(data))
 }
 
 type Mysql struct {
+	Servers                             []string `json:"servers"`
+	PerfEventsStatementsDigestTextLimit int64    `json:"perf_events_statements_digest_text_limit"`
+	PerfEventsStatementsLimit           int64    `json:"perf_events_statements_limit"`
+	PerfEventsStatementsTimeLimit       int64    `json:"perf_events_statements_time_limit"`
+	TableSchemaDatabases                []string `json:"table_schema_databases"`
+	GatherProcessList                   bool     `json:"gather_process_list"`
+	GatherUserStatistics                bool     `json:"gather_user_statistics"`
+	GatherInfoSchemaAutoInc             bool     `json:"gather_info_schema_auto_inc"`
+	GatherInnoDBMetrics                 bool     `json:"gather_innodb_metrics"`
+	GatherSlaveStatus                   bool     `json:"gather_slave_status"`
+	GatherBinaryLogs                    bool     `json:"gather_binary_logs"`
+	GatherTableIOWaits                  bool     `json:"gather_table_io_waits"`
+	GatherTableLockWaits                bool     `json:"gather_table_lock_waits"`
+	GatherIndexIOWaits                  bool     `json:"gather_index_io_waits"`
+	GatherEventWaits                    bool     `json:"gather_event_waits"`
+	GatherTableSchema                   bool     `json:"gather_table_schema"`
+	GatherFileEventsStats               bool     `json:"gather_file_events_stats"`
+	GatherPerfEventsStatements          bool     `json:"gather_perf_events_statements"`
+
+	GatherPerfEventsStatementsHistory    bool     `json:"gather_perf_events_statements_history"`
+
+	IntervalSlow                        string   `json:"interval_slow"`
+	SSLCA                               string   `json:"ssl_ca"`
+	SSLCert                             string   `json:"ssl_cert"`
+	SSLKey                              string   `json:"ssl_key"`
+}
+
+/*type Mysql struct {
 	Servers                             []string `toml:"servers"`
 	PerfEventsStatementsDigestTextLimit int64    `toml:"perf_events_statements_digest_text_limit"`
 	PerfEventsStatementsLimit           int64    `toml:"perf_events_statements_limit"`
@@ -85,7 +113,7 @@ type Mysql struct {
 	SSLCA                               string   `toml:"ssl_ca"`
 	SSLCert                             string   `toml:"ssl_cert"`
 	SSLKey                              string   `toml:"ssl_key"`
-}
+}*/
 
 var sampleConfig = `
   ## specify servers via a url matching:
@@ -611,6 +639,8 @@ const (
 			FROM information_schema.tables
 		WHERE table_schema = 'performance_schema' AND table_name = ?
 	`
+
+	perfSchemaEventsStatementHistoryQuery = `SELECT TIMER_START, TIMER_END, SQL_TEXT FROM performance_schema.events_statements_history_long`
 )
 
 func (m *Mysql) gatherServer(serv string, acc telegraf.Accumulator) error {
@@ -642,94 +672,142 @@ func (m *Mysql) gatherServer(serv string, acc telegraf.Accumulator) error {
 		}
 	}
 
+	if m.GatherPerfEventsStatementsHistory {
+		err = m.gatherPerfEventsStatementsHistory(db, serv, acc)
+		if err != nil {
+			log.Debugf("gatherPerfEventsStatementsHistory error:", err)
+		} else {
+			log.Debugf("gatherPerfEventsStatementsHistory success")
+		}
+	}
+
 	if m.GatherBinaryLogs {
 		err = m.gatherBinaryLogs(db, serv, acc)
 		if err != nil {
-			return err
+			//return err
+			log.Debugf("gatherBinaryLogs error: ", err)
+		} else {
+			log.Debugf("gatherBinaryLogs success")
 		}
 	}
 
 	if m.GatherProcessList {
 		err = m.GatherProcessListStatuses(db, serv, acc)
 		if err != nil {
-			return err
+			//return err
+			log.Debugf("GatherProcessList error: ", err)
+		} else {
+			log.Debugf("GatherProcessList success")
 		}
 	}
 
 	if m.GatherUserStatistics {
 		err = m.GatherUserStatisticsStatuses(db, serv, acc)
 		if err != nil {
-			return err
+			//return err
+			log.Debugf("GatherUserStatistics error: ", err)
+		} else {
+			log.Debugf("GatherUserStatistics success")
 		}
 	}
 
 	if m.GatherSlaveStatus {
 		err = m.gatherSlaveStatuses(db, serv, acc)
 		if err != nil {
-			return err
+			//return err
+			log.Debugf("GatherSlaveStatus error: ", err)
+		} else {
+			log.Debugf("GatherSlaveStatus success")
 		}
 	}
 
 	if m.GatherInfoSchemaAutoInc {
 		err = m.gatherInfoSchemaAutoIncStatuses(db, serv, acc)
 		if err != nil {
-			return err
+			//return err
+			log.Debugf("GatherInfoSchemaAutoInc error: ", err)
+		} else {
+			log.Debugf("GatherInfoSchemaAutoInc success")
 		}
 	}
 
 	if m.GatherInnoDBMetrics {
 		err = m.gatherInnoDBMetrics(db, serv, acc)
 		if err != nil {
-			return err
+			//return err
+			log.Debugf("GatherInnoDBMetrics error: ", err)
+		} else {
+			log.Debugf("GatherInnoDBMetrics success")
 		}
 	}
 
 	if m.GatherTableIOWaits {
 		err = m.gatherPerfTableIOWaits(db, serv, acc)
 		if err != nil {
-			return err
+			//return err
+			log.Debugf("GatherTableIOWaits error: ", err)
+		} else {
+			log.Debugf("GatherTableIOWaits success")
 		}
 	}
 
 	if m.GatherIndexIOWaits {
 		err = m.gatherPerfIndexIOWaits(db, serv, acc)
 		if err != nil {
-			return err
+			//return err
+			log.Debugf("GatherIndexIOWaits error: ", err)
+		} else {
+			log.Debugf("GatherIndexIOWaits success")
 		}
 	}
 
 	if m.GatherTableLockWaits {
 		err = m.gatherPerfTableLockWaits(db, serv, acc)
 		if err != nil {
-			return err
+			//return err
+			log.Debugf("GatherTableLockWaits error: ", err)
+		} else {
+			log.Debugf("GatherTableLockWaits success")
 		}
 	}
 
 	if m.GatherEventWaits {
 		err = m.gatherPerfEventWaits(db, serv, acc)
 		if err != nil {
-			return err
+			//return err
+			log.Debugf("GatherEventWaits error: ", err)
+		} else {
+			log.Debugf("GatherEventWaits success")
 		}
 	}
 
 	if m.GatherFileEventsStats {
 		err = m.gatherPerfFileEventsStatuses(db, serv, acc)
 		if err != nil {
-			return err
+			//return err
+			log.Debugf("GatherFileEventsStats error: ", err)
+		} else {
+			log.Debugf("GatherFileEventsStats success")
 		}
 	}
 
 	if m.GatherPerfEventsStatements {
 		err = m.gatherPerfEventsStatements(db, serv, acc)
 		if err != nil {
-			return err
+			//return err
+			log.Debugf("GatherPerfEventsStatements error: ", err)
+		} else {
+			log.Debugf("GatherPerfEventsStatements success")
 		}
 	}
 
 	if m.GatherTableSchema {
 		err = m.gatherTableSchema(db, serv, acc)
 		if err != nil {
-			return err
+			//return err
+			log.Debugf("GatherTableSchema error: ", err)
+		} else {
+			log.Debugf("GatherTableSchema success")
 		}
 	}
 	return nil
@@ -858,6 +936,38 @@ func (m *Mysql) gatherBinaryLogs(db *sql.DB, serv string, acc telegraf.Accumulat
 		"binary_files_count": count,
 	}
 	acc.AddFields("mysql", fields, tags)
+	return nil
+}
+
+func (m *Mysql) gatherPerfEventsStatementsHistory(db *sql.DB, serv string, acc telegraf.Accumulator) error {
+	// run query
+	rows, err := db.Query(perfSchemaEventsStatementHistoryQuery)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	var (
+		timer_start		int64
+		timer_wait		int64
+		sql_text		string
+	)
+	var servtag string
+	servtag = getDSNTag(serv)
+
+	for rows.Next() {
+		err = rows.Scan(&timer_start, &timer_wait, &sql_text)
+		if err != nil {
+			return err
+		}
+		fields := map[string]interface{}{
+			"timer_start":	timer_start,
+			"timer_wait":	timer_wait,
+			"sql_text":		sql_text,
+			"index":		"sql_statement",
+		}
+		tags := map[string]string{"server": servtag}
+		acc.AddFields("mysql_info_schema", fields, tags)
+	}
 	return nil
 }
 
@@ -993,7 +1103,7 @@ func (m *Mysql) gatherGlobalStatuses(db *sql.DB, serv string, acc telegraf.Accum
 	if m.GatherUserStatistics {
 		conn_rows, err := db.Query("select user, total_connections, concurrent_connections, connected_time, busy_time, cpu_time, bytes_received, bytes_sent, binlog_bytes_written, rows_fetched, rows_updated, table_rows_read, select_commands, update_commands, other_commands, commit_transactions, rollback_transactions, denied_connections, lost_connections, access_denied, empty_queries, total_ssl_connections FROM INFORMATION_SCHEMA.USER_STATISTICS GROUP BY user")
 		if err != nil {
-			log.Printf("E! MySQL Error gathering user stats: %s", err)
+			log.Printf("MySQL Error gathering user stats: %s", err)
 		} else {
 			for conn_rows.Next() {
 				var user string
