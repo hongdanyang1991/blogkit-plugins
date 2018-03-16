@@ -1,4 +1,4 @@
-package tomcat
+package main
 
 import (
 	"encoding/xml"
@@ -6,10 +6,59 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
+	"flag"
+	"encoding/json"
+	"github.com/qiniu/log"
 
 	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf"
 	"github.com/hongdanyang1991/blogkit-plugins/common"
+	"os"
+	"github.com/hongdanyang1991/blogkit-plugins/common/conf"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/agent"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/models"
 )
+
+//var tomcatConf = flag.String("f", "plugins/tomcat/conf/tomcat.conf", "configuration file to load")
+//var logPath = "plugins/tomcat/log/log_tomcat"
+
+var tomcatConf = flag.String("f", "tomcat.conf", "configuration file to load")
+var logPath = "log_tomcat"
+
+func main() {
+	newfile := logPath + time.Now().Format("0102") + ".log"
+	file, err := os.OpenFile(newfile, os.O_WRONLY|os.O_APPEND|os.O_CREATE, os.ModeAppend)
+	if err != nil {
+		err = fmt.Errorf("rotateLog open newfile %v err %v", newfile, err)
+		log.Error(err)
+		return
+	}
+	log.SetOutput(file)
+	log.SetOutputLevel(0)
+	flag.Parse()
+	tomcat := &Tomcat{}
+	if err := conf.LoadEx(tomcat, *tomcatConf); err != nil {
+		log.Fatal("config.Load failed:", err)
+	}
+	log.Info("start collect tomcat metric data")
+	metrics := []telegraf.Metric{}
+	input := models.NewRunningInput(tomcat, &models.InputConfig{})
+	acc := agent.NewAccumulator(input, metrics)
+	tomcat.Gather(acc)
+	datas := []map[string]interface{}{}
+
+	log.Println(acc.Metrics)
+	for _, metric := range acc.Metrics {
+		datas = append(datas, metric.Fields())
+	}
+	data, err := json.Marshal(datas)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(data))
+
+}
 
 type TomcatStatus struct {
 	TomcatJvm        TomcatJvm         `xml:"jvm"`
@@ -57,14 +106,14 @@ type RequestInfo struct {
 }
 
 type Tomcat struct {
-	URL      string
-	Username string
-	Password string
+	URL      string	`json:"url"`
+	Username string	`json:"user_name"`
+	Password string	`json:"password"`
 	Timeout  common.Duration
 
-	SSLCA              string `toml:"ssl_ca"`
-	SSLCert            string `toml:"ssl_cert"`
-	SSLKey             string `toml:"ssl_key"`
+	SSLCA              string `json:"ssl_ca"`
+	SSLCert            string `json:"ssl_cert"`
+	SSLKey             string `json:"ssl_key"`
 	InsecureSkipVerify bool
 
 	client  *http.Client

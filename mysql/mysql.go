@@ -9,6 +9,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"github.com/json-iterator/go"
+
 
 	"github.com/hongdanyang1991/blogkit-plugins/common"
 	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf"
@@ -20,13 +22,14 @@ import (
 	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/agent"
 	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/models"
 	"os"
+	"io/ioutil"
 )
 
 var mysqlConf = flag.String("f", "plugins/mysql5.1/conf/mysql.conf", "configuration file to load")
-var logPath = "plugins/mysql5.1/log/log_"
+var logPath = "plugins/mysql5.1/log/log_mysql"
 
 //var mysqlConf = flag.String("f", "mysql.conf", "configuration file to load")
-//var logPath = "log_"
+//var logPath = "log_mysql"
 
 func main() {
 	newfile := logPath + time.Now().Format("0102") + ".log"
@@ -50,7 +53,7 @@ func main() {
 	mysql.Gather(acc)
 	datas := []map[string]interface{}{}
 
-	log.Println(acc.Metrics)
+	//log.Println(acc.Metrics)
 	for _, metric := range acc.Metrics {
 		datas = append(datas, metric.Fields())
 	}
@@ -82,12 +85,19 @@ type Mysql struct {
 	GatherFileEventsStats               bool     `json:"gather_file_events_stats"`
 	GatherPerfEventsStatements          bool     `json:"gather_perf_events_statements"`
 
-	GatherPerfEventsStatementsHistory    bool     `json:"gather_perf_events_statements_history"`
-
 	IntervalSlow                        string   `json:"interval_slow"`
 	SSLCA                               string   `json:"ssl_ca"`
 	SSLCert                             string   `json:"ssl_cert"`
 	SSLKey                              string   `json:"ssl_key"`
+
+
+	version								string	 `json:"version"`
+	eventCollectionEnable				bool	 `json:"event_collection_enable"`
+	GatherEventsStatements			    bool     `json:"gather_events_statements"`
+	GatherEventsStages					bool     `json:"gather_events_stages"`
+
+	LastGatherStatementsStartTime		string	 `json:"last_gather_statements_start_time"`
+	LastGatherStagesStartTime			string	 `json:"last_gather_stages_start_time"`
 }
 
 /*type Mysql struct {
@@ -640,7 +650,72 @@ const (
 		WHERE table_schema = 'performance_schema' AND table_name = ?
 	`
 
-	perfSchemaEventsStatementHistoryQuery = `SELECT TIMER_START, TIMER_END, SQL_TEXT FROM performance_schema.events_statements_history_long`
+
+	versionQuery = `
+		select version() version
+	`
+	eventCollectionInstrumentsEnableQuery = `
+		UPDATE performance_schema.setup_instruments SET ENABLED = 'YES', TIMED = 'YES'
+			WHERE NAME LIKE 'stage/sql/[a-c]';
+	`
+
+	eventCollectionConsumersEnableQuery = `
+		UPDATE performance_schema.setup_consumers SET ENABLED = 'YES'
+			WHERE NAME LIKE '%statements%' || NAME LIKE '%stages%';
+	`
+	eventStagesQuery_old = `
+		select statements.*,stages.event_name,stages.timer_wait stage_time from
+			(select a.start_time,a.thread_id,a.event_id,a.sql_time,a.digest_text,a.digest from
+				(select date_sub(now(),INTERVAL (select VARIABLE_VALUE from information_schema.global_status where variable_name='UPTIME')-TIMER_START*10e-13 second) start_time
+				,thread_id
+				,event_id
+				,timer_wait  sql_time
+				,digest_text
+				,current_schema
+				,digest
+			from performance_schema.events_statements_history_long where digest_text is not null and current_schema is not null) a where a.start_time >  '2018-03-09 16:07:00' ) statements left join performance_schema.events_stages_history_long stages
+		on statements.event_id = stages.nesting_event_id where stages.event_name is not null and stages.timer_wait is not null order by statements.start_time
+	`
+	eventStatementsQuery_old = `
+		select statements.*,pro.processlist_user,pro.processlist_host,pro.processlist_db from
+			(select a.start_time,a.thread_id,a.event_id,a.sql_time,a.digest_text,a.digest from
+				(select date_sub(now(),INTERVAL (select VARIABLE_VALUE from information_schema.global_status where variable_name='UPTIME')-TIMER_START*10e-13 second) start_time
+				,thread_id
+				,event_id
+				,timer_wait  sql_time
+				,digest_text
+				,current_schema
+				,digest
+			from performance_schema.events_statements_history_long where digest_text is not null and current_schema is not null) a where a.start_time >  '2018-03-09 16:07:00' ) statements left join performance_schema.threads pro
+		on statements.thread_id = pro.thread_id where pro.processlist_user is not null order by statements.start_time
+	`
+
+	eventStagesQuery = `
+		select statements.*,stages.event_name,stages.timer_wait stage_time from
+			(select a.start_time,a.thread_id,a.event_id,a.sql_time,a.digest_text,a.digest from
+				(select date_sub(now(),INTERVAL (select VARIABLE_VALUE from performance_schema.global_status where variable_name='UPTIME')-TIMER_START*10e-13 second) start_time
+				,thread_id
+				,event_id
+				,timer_wait  sql_time
+				,digest_text
+				,current_schema
+				,digest
+			from performance_schema.events_statements_history_long where digest_text is not null and current_schema is not null) a where a.start_time >  '2018-03-09 16:07:00' ) statements left join performance_schema.events_stages_history_long stages
+		on statements.event_id = stages.nesting_event_id where stages.event_name is not null and stages.timer_wait is not null order by statements.start_time
+	`
+	eventStatementsQuery = `
+		select statements.*,pro.processlist_user,pro.processlist_host,pro.processlist_db from
+			(select a.start_time,a.thread_id,a.event_id,a.sql_time,a.digest_text,a.digest from
+				(select date_sub(now(),INTERVAL (select VARIABLE_VALUE from performance_schema.global_status where variable_name='UPTIME')-TIMER_START*10e-13 second) start_time
+				,thread_id
+				,event_id
+				,timer_wait  sql_time
+				,digest_text
+				,current_schema
+				,digest
+			from performance_schema.events_statements_history_long where digest_text is not null and current_schema is not null) a where a.start_time >  '2018-03-09 16:07:00' ) statements left join performance_schema.threads pro
+		on statements.thread_id = pro.thd_id order by statements.start_time
+	`
 )
 
 func (m *Mysql) gatherServer(serv string, acc telegraf.Accumulator) error {
@@ -656,7 +731,7 @@ func (m *Mysql) gatherServer(serv string, acc telegraf.Accumulator) error {
 
 	defer db.Close()
 
-	err = m.gatherGlobalStatuses(db, serv, acc)
+/*	err = m.gatherGlobalStatuses(db, serv, acc)
 	if err != nil {
 		return err
 	}
@@ -670,15 +745,29 @@ func (m *Mysql) gatherServer(serv string, acc telegraf.Accumulator) error {
 			}
 			lastT = time.Now()
 		}
+	}*/
+
+
+	if m.GatherEventsStatements {
+		err = m.gatherEventsStatements(db, serv, acc)
+		if err != nil {
+			log.Debugf("GatherEventsStatements error:", err)
+		} else {
+			log.Debugf("GatherEventsStatements success")
+		}
 	}
 
-	if m.GatherPerfEventsStatementsHistory {
-		err = m.gatherPerfEventsStatementsHistory(db, serv, acc)
+	if m.GatherEventsStages {
+		err = m.gatherEventsStages(db, serv, acc)
 		if err != nil {
-			log.Debugf("gatherPerfEventsStatementsHistory error:", err)
+			log.Debugf("gatherEventsStages error:", err)
 		} else {
-			log.Debugf("gatherPerfEventsStatementsHistory success")
+			log.Debugf("gatherEventsStages success")
 		}
+	}
+
+	if m.GatherEventsStages || m.GatherEventsStatements {
+		m.updateMysqlConfig()
 	}
 
 	if m.GatherBinaryLogs {
@@ -939,37 +1028,182 @@ func (m *Mysql) gatherBinaryLogs(db *sql.DB, serv string, acc telegraf.Accumulat
 	return nil
 }
 
-func (m *Mysql) gatherPerfEventsStatementsHistory(db *sql.DB, serv string, acc telegraf.Accumulator) error {
-	// run query
-	rows, err := db.Query(perfSchemaEventsStatementHistoryQuery)
+func getVersion(db *sql.DB) (string, error) {
+	rows, err := db.Query(versionQuery)
+	if err != nil {
+		return "", nil
+	}
+	defer rows.Close()
+	var version string
+	for rows.Next() {
+		if err := rows.Scan(&version); err != nil {
+			return "", err
+		}
+
+	}
+	return version, nil
+}
+
+/*func (m *Mysql) setVersion(db *sql.DB) error {
+	version, err := getVersion(db)
+	if err != nil {
+		return err
+	}
+	m.Version = version
+	//更新配置文件中version
+	err = m.updateMysqlConfig()
+	return err
+}*/
+
+func (m *Mysql) updateMysqlConfig() error {
+	confBytes, err := jsoniter.MarshalIndent(m, "", "    ")
+	if err != nil {
+		return fmt.Errorf("mysql config %v marshal failed, err is %v", m, err)
+	}
+	if err := ioutil.WriteFile(*mysqlConf, confBytes, 0644); err != nil {
+		return err
+	}
+	return err
+}
+
+
+func (m *Mysql) prepareEventQuery(db *sql.DB) (float64, error) {
+	if !m.eventCollectionEnable {
+		if _, err := db.Exec(eventCollectionInstrumentsEnableQuery); err != nil {
+			return 0, err
+		}
+		if _, err := db.Exec(eventCollectionConsumersEnableQuery); err != nil {
+			return 0, err
+		}
+		m.eventCollectionEnable = true
+	}
+
+	if m.version == "" {
+		version, err := getVersion(db)
+		if err != nil {
+			return  0, err
+		}
+		m.version = version
+	}
+	version, err := strconv.ParseFloat(m.version[0 : 3], 32)
+	if err != nil {
+		return 0, err
+	}
+	return version, nil
+}
+
+func (m *Mysql) gatherEventsStatements(db *sql.DB, serv string, acc telegraf.Accumulator) error {
+	version, err := m.prepareEventQuery(db)
+	if err != nil {
+		return err
+	}
+	var rows *sql.Rows
+	if version <= 5.6 {
+		rows, err = db.Query(eventStatementsQuery_old)
+	} else {
+		rows, err = db.Query(eventStatementsQuery)
+	}
 	if err != nil {
 		return err
 	}
 	defer rows.Close()
 	var (
-		timer_start		int64
-		timer_wait		int64
-		sql_text		string
+		start_time		string
+		thread_id		uint64
+		event_id		uint64
+		sql_time		uint64
+		digest_text		string
+		digest			string
+		processlist_user	string
+		processlist_host	string
+		processlist_db		string
+	)
+	var servtag string
+	servtag = getDSNTag(serv)
+
+
+	types, err := rows.ColumnTypes()
+
+	fmt.Println(types)
+
+	for rows.Next() {
+
+		err = rows.Scan(&start_time, &thread_id, &event_id, &sql_time, &digest_text, &digest, &processlist_user, &processlist_host, &processlist_db)
+		if err != nil {
+			return err
+		}
+		fields := map[string]interface{}{
+			"server":			servtag,
+			"measurements":		"eventsStatement",
+			"start_time":		start_time,
+			"thread_id":		thread_id,
+			"event_id":			event_id,
+			"sql_time":			sql_time,
+			"digest_text":		digest_text,
+			"digest":			digest,
+			"processlist_user":	processlist_user,
+			"processlist_host":	processlist_host,
+			"processlist_db":	processlist_db,
+		}
+		tags := map[string]string{}
+		acc.AddFields("eventStatement", fields, tags)
+	}
+	m.LastGatherStatementsStartTime = start_time
+	return nil
+}
+
+func (m *Mysql) gatherEventsStages(db *sql.DB, serv string, acc telegraf.Accumulator) error {
+	version, err := m.prepareEventQuery(db)
+	if err != nil {
+		return err
+	}
+	var rows *sql.Rows
+	if version <= 5.6 {
+		rows, err = db.Query(eventStagesQuery_old)
+	} else {
+		rows, err = db.Query(eventStagesQuery)
+	}
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	var (
+		start_time		string
+		thread_id		uint64
+		event_id		uint64
+		sql_time		uint64
+		digest_text		string
+		digest			string
+		event_name		string
+		stage_time		uint64
 	)
 	var servtag string
 	servtag = getDSNTag(serv)
 
 	for rows.Next() {
-		err = rows.Scan(&timer_start, &timer_wait, &sql_text)
+		err = rows.Scan(&start_time, &thread_id, &event_id, &sql_time, &digest_text, &digest, &event_name, &stage_time)
 		if err != nil {
 			return err
 		}
 		fields := map[string]interface{}{
-			"timer_start":	timer_start,
-			"timer_wait":	timer_wait,
-			"sql_text":		sql_text,
-			"index":		"sql_statement",
+			"server":		servtag,
+			"measurements": "eventsStage",
+			"start_time":	start_time,
+			"thread_id":	thread_id,
+			"event_id":		event_id,
+			"sql_time":		sql_time,
+			"digest_text":	digest_text,
+			"digest":		digest,
+			"event_name":	event_name,
+			"stage_time":	stage_time,
 		}
-		tags := map[string]string{"server": servtag}
-		acc.AddFields("mysql_info_schema", fields, tags)
+		tags := map[string]string{}
+		acc.AddFields("eventStage", fields, tags)
 	}
+	m.LastGatherStagesStartTime = start_time
 	return nil
 }
+
 
 // gatherGlobalStatuses can be used to get MySQL status metrics
 // the mappings of actual names and names of each status to be exported
