@@ -25,11 +25,11 @@ import (
 	"io/ioutil"
 )
 
-var mysqlConf = flag.String("f", "plugins/mysql5.1/conf/mysql.conf", "configuration file to load")
-var logPath = "plugins/mysql5.1/log/log_mysql"
+//var mysqlConf = flag.String("f", "plugins/mysql/conf/mysql.conf", "configuration file to load")
+//var logPath = "plugins/mysql/log/log"
 
-//var mysqlConf = flag.String("f", "mysql.conf", "configuration file to load")
-//var logPath = "log_mysql"
+var mysqlConf = flag.String("f", "mysql.conf", "configuration file to load")
+var logPath = "log_mysql"
 
 func main() {
 	newfile := logPath + time.Now().Format("0102") + ".log"
@@ -45,6 +45,14 @@ func main() {
 	mysql := &Mysql{}
 	if err := conf.LoadEx(mysql, *mysqlConf); err != nil {
 		log.Fatal("config.Load failed:", err)
+	}
+	currentTime := time.Now()
+	timeStr := currentTime.Format("2006-01-02 15:04:05.999999")
+	if mysql.LastGatherStagesStartTime == "" {
+		mysql.LastGatherStagesStartTime = timeStr
+	}
+	if mysql.LastGatherStatementsStartTime == "" {
+		mysql.LastGatherStatementsStartTime = timeStr
 	}
 	log.Info("start collect mysql metric data")
 	metrics := []telegraf.Metric{}
@@ -63,6 +71,7 @@ func main() {
 		return
 	}
 	fmt.Println(string(data))
+	log.Println(string(data))
 }
 
 type Mysql struct {
@@ -71,6 +80,7 @@ type Mysql struct {
 	PerfEventsStatementsLimit           int64    `json:"perf_events_statements_limit"`
 	PerfEventsStatementsTimeLimit       int64    `json:"perf_events_statements_time_limit"`
 	TableSchemaDatabases                []string `json:"table_schema_databases"`
+	GatherGlobalStatus					bool      `json:"gather_global_status"`
 	GatherProcessList                   bool     `json:"gather_process_list"`
 	GatherUserStatistics                bool     `json:"gather_user_statistics"`
 	GatherInfoSchemaAutoInc             bool     `json:"gather_info_schema_auto_inc"`
@@ -99,31 +109,6 @@ type Mysql struct {
 	LastGatherStatementsStartTime		string	 `json:"last_gather_statements_start_time"`
 	LastGatherStagesStartTime			string	 `json:"last_gather_stages_start_time"`
 }
-
-/*type Mysql struct {
-	Servers                             []string `toml:"servers"`
-	PerfEventsStatementsDigestTextLimit int64    `toml:"perf_events_statements_digest_text_limit"`
-	PerfEventsStatementsLimit           int64    `toml:"perf_events_statements_limit"`
-	PerfEventsStatementsTimeLimit       int64    `toml:"perf_events_statements_time_limit"`
-	TableSchemaDatabases                []string `toml:"table_schema_databases"`
-	GatherProcessList                   bool     `toml:"gather_process_list"`
-	GatherUserStatistics                bool     `toml:"gather_user_statistics"`
-	GatherInfoSchemaAutoInc             bool     `toml:"gather_info_schema_auto_inc"`
-	GatherInnoDBMetrics                 bool     `toml:"gather_innodb_metrics"`
-	GatherSlaveStatus                   bool     `toml:"gather_slave_status"`
-	GatherBinaryLogs                    bool     `toml:"gather_binary_logs"`
-	GatherTableIOWaits                  bool     `toml:"gather_table_io_waits"`
-	GatherTableLockWaits                bool     `toml:"gather_table_lock_waits"`
-	GatherIndexIOWaits                  bool     `toml:"gather_index_io_waits"`
-	GatherEventWaits                    bool     `toml:"gather_event_waits"`
-	GatherTableSchema                   bool     `toml:"gather_table_schema"`
-	GatherFileEventsStats               bool     `toml:"gather_file_events_stats"`
-	GatherPerfEventsStatements          bool     `toml:"gather_perf_events_statements"`
-	IntervalSlow                        string   `toml:"interval_slow"`
-	SSLCA                               string   `toml:"ssl_ca"`
-	SSLCert                             string   `toml:"ssl_cert"`
-	SSLKey                              string   `toml:"ssl_key"`
-}*/
 
 var sampleConfig = `
   ## specify servers via a url matching:
@@ -523,7 +508,8 @@ const (
         FROM information_schema.processlist
         WHERE ID != connection_id()
         GROUP BY command,state
-        ORDER BY null`
+        ORDER BY null
+	`
 	infoSchemaUserStatisticsQuery = `
         SELECT *,count(*)
         FROM information_schema.user_statistics
@@ -655,13 +641,13 @@ const (
 		select version() version
 	`
 	eventCollectionInstrumentsEnableQuery = `
-		UPDATE performance_schema.setup_instruments SET ENABLED = 'YES', TIMED = 'YES'
-			WHERE NAME LIKE 'stage/sql/[a-c]';
+	UPDATE performance_schema.setup_instruments SET ENABLED = 'YES', TIMED = 'YES'
+		WHERE NAME LIKE 'stage/%' ||  NAME LIKE 'statement/%';
 	`
 
 	eventCollectionConsumersEnableQuery = `
 		UPDATE performance_schema.setup_consumers SET ENABLED = 'YES'
-			WHERE NAME LIKE '%statements%' || NAME LIKE '%stages%';
+			WHERE NAME LIKE '%stages%' || NAME LIKE '%statements%';
 	`
 	eventStagesQuery_old = `
 		select statements.*,stages.event_name,stages.timer_wait stage_time from
@@ -673,7 +659,7 @@ const (
 				,digest_text
 				,current_schema
 				,digest
-			from performance_schema.events_statements_history_long where digest_text is not null and current_schema is not null) a where a.start_time >  '2018-03-09 16:07:00' ) statements left join performance_schema.events_stages_history_long stages
+			from performance_schema.events_statements_history_long where digest_text is not null and current_schema is not null) a where a.start_time >  ? ) statements left join performance_schema.events_stages_history_long stages
 		on statements.event_id = stages.nesting_event_id where stages.event_name is not null and stages.timer_wait is not null order by statements.start_time
 	`
 	eventStatementsQuery_old = `
@@ -686,7 +672,7 @@ const (
 				,digest_text
 				,current_schema
 				,digest
-			from performance_schema.events_statements_history_long where digest_text is not null and current_schema is not null) a where a.start_time >  '2018-03-09 16:07:00' ) statements left join performance_schema.threads pro
+			from performance_schema.events_statements_history_long where digest_text is not null and current_schema is not null) a where a.start_time >  ? ) statements left join performance_schema.threads pro
 		on statements.thread_id = pro.thread_id where pro.processlist_user is not null order by statements.start_time
 	`
 
@@ -700,7 +686,7 @@ const (
 				,digest_text
 				,current_schema
 				,digest
-			from performance_schema.events_statements_history_long where digest_text is not null and current_schema is not null) a where a.start_time >  '2018-03-09 16:07:00' ) statements left join performance_schema.events_stages_history_long stages
+			from performance_schema.events_statements_history_long where digest_text is not null and current_schema is not null) a where a.start_time >  ? ) statements left join performance_schema.events_stages_history_long stages
 		on statements.event_id = stages.nesting_event_id where stages.event_name is not null and stages.timer_wait is not null order by statements.start_time
 	`
 	eventStatementsQuery = `
@@ -713,7 +699,7 @@ const (
 				,digest_text
 				,current_schema
 				,digest
-			from performance_schema.events_statements_history_long where digest_text is not null and current_schema is not null) a where a.start_time >  '2018-03-09 16:07:00' ) statements left join performance_schema.threads pro
+			from performance_schema.events_statements_history_long where digest_text is not null and current_schema is not null) a where a.start_time >  ? ) statements left join performance_schema.threads pro
 		on statements.thread_id = pro.thd_id order by statements.start_time
 	`
 )
@@ -731,9 +717,11 @@ func (m *Mysql) gatherServer(serv string, acc telegraf.Accumulator) error {
 
 	defer db.Close()
 
-/*	err = m.gatherGlobalStatuses(db, serv, acc)
-	if err != nil {
-		return err
+	if m.GatherGlobalStatus {
+		err = m.gatherGlobalStatuses(db, serv, acc)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Global Variables may be gathered less often
@@ -745,7 +733,7 @@ func (m *Mysql) gatherServer(serv string, acc telegraf.Accumulator) error {
 			}
 			lastT = time.Now()
 		}
-	}*/
+	}
 
 
 	if m.GatherEventsStatements {
@@ -1099,9 +1087,10 @@ func (m *Mysql) gatherEventsStatements(db *sql.DB, serv string, acc telegraf.Acc
 	}
 	var rows *sql.Rows
 	if version <= 5.6 {
-		rows, err = db.Query(eventStatementsQuery_old)
+		rows, err = db.Query(eventStatementsQuery_old, m.LastGatherStatementsStartTime)
+		//rows, err = db.Query(eventStatementsQuery_old, "2018-03-18 15:14:17.288512")
 	} else {
-		rows, err = db.Query(eventStatementsQuery)
+		rows, err = db.Query(eventStatementsQuery, m.LastGatherStatementsStartTime)
 	}
 	if err != nil {
 		return err
@@ -1121,17 +1110,13 @@ func (m *Mysql) gatherEventsStatements(db *sql.DB, serv string, acc telegraf.Acc
 	var servtag string
 	servtag = getDSNTag(serv)
 
-
-	types, err := rows.ColumnTypes()
-
-	fmt.Println(types)
-
 	for rows.Next() {
 
 		err = rows.Scan(&start_time, &thread_id, &event_id, &sql_time, &digest_text, &digest, &processlist_user, &processlist_host, &processlist_db)
 		if err != nil {
 			return err
 		}
+
 		fields := map[string]interface{}{
 			"server":			servtag,
 			"measurements":		"eventsStatement",
@@ -1148,7 +1133,10 @@ func (m *Mysql) gatherEventsStatements(db *sql.DB, serv string, acc telegraf.Acc
 		tags := map[string]string{}
 		acc.AddFields("eventStatement", fields, tags)
 	}
-	m.LastGatherStatementsStartTime = start_time
+	if start_time != "" {
+		m.LastGatherStatementsStartTime = start_time
+	}
+
 	return nil
 }
 
@@ -1159,9 +1147,10 @@ func (m *Mysql) gatherEventsStages(db *sql.DB, serv string, acc telegraf.Accumul
 	}
 	var rows *sql.Rows
 	if version <= 5.6 {
-		rows, err = db.Query(eventStagesQuery_old)
+		rows, err = db.Query(eventStagesQuery_old, m.LastGatherStagesStartTime)
+		//rows, err = db.Query(eventStagesQuery_old, "2018-03-18 15:14:17.288512")
 	} else {
-		rows, err = db.Query(eventStagesQuery)
+		rows, err = db.Query(eventStagesQuery, m.LastGatherStagesStartTime)
 	}
 	if err != nil {
 		return err
@@ -1200,7 +1189,9 @@ func (m *Mysql) gatherEventsStages(db *sql.DB, serv string, acc telegraf.Accumul
 		tags := map[string]string{}
 		acc.AddFields("eventStage", fields, tags)
 	}
-	m.LastGatherStagesStartTime = start_time
+	if start_time != "" {
+		m.LastGatherStagesStartTime = start_time
+	}
 	return nil
 }
 
@@ -1224,8 +1215,10 @@ func (m *Mysql) gatherGlobalStatuses(db *sql.DB, serv string, acc telegraf.Accum
 
 	// parse the DSN and save host name as a tag
 	servtag := getDSNTag(serv)
+	//tags := map[string]string{"server": servtag}
+	//fields := make(map[string]interface{})
 	tags := map[string]string{"server": servtag}
-	fields := make(map[string]interface{})
+	fields := map[string]interface{}{"server": servtag}
 	for rows.Next() {
 		var name string
 		var val interface{}
@@ -1247,10 +1240,10 @@ func (m *Mysql) gatherGlobalStatuses(db *sql.DB, serv string, acc telegraf.Accum
 			}
 		}
 		// Send 20 fields at a time
-		if len(fields) >= 20 {
+/*		if len(fields) >= 20 {
 			acc.AddFields("mysql", fields, tags)
 			fields = make(map[string]interface{})
-		}
+		}*/
 
 		if found {
 			continue
@@ -1322,7 +1315,7 @@ func (m *Mysql) gatherGlobalStatuses(db *sql.DB, serv string, acc telegraf.Accum
 				}
 
 				tags := map[string]string{"server": servtag, "user": user}
-				fields := make(map[string]interface{})
+				fields := map[string]interface{}{"server": servtag, "user": user}
 
 				if err != nil {
 					return err

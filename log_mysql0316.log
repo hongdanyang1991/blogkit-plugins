@@ -1,3 +1,0 @@
-2018/03/16 15:48:22 [INFO][github.com/hongdanyang1991/blogkit-plugins/mysql] mysql.go:49: start collect mysql metric data
-2018/03/16 15:48:22 [DEBUG][github.com/hongdanyang1991/blogkit-plugins/mysql] mysql.go:756: GatherEventsStatements success
-2018/03/16 15:48:23 [DEBUG][github.com/hongdanyang1991/blogkit-plugins/mysql] mysql.go:765: gatherEventsStages success
