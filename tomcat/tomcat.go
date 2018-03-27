@@ -6,40 +6,35 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"time"
 	"flag"
 	"encoding/json"
 	"github.com/qiniu/log"
 
 	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf"
 	"github.com/hongdanyang1991/blogkit-plugins/common"
-	"os"
 	"github.com/hongdanyang1991/blogkit-plugins/common/conf"
 	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/agent"
 	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/models"
+	"github.com/hongdanyang1991/blogkit-plugins/common/utils"
 )
 
 //var tomcatConf = flag.String("f", "plugins/tomcat/conf/tomcat.conf", "configuration file to load")
-//var logPath = "plugins/tomcat/log/log_tomcat"
+//var logPath = "plugins/tomcat/log/tomcat_"
 
 var tomcatConf = flag.String("f", "tomcat.conf", "configuration file to load")
-var logPath = "log_tomcat"
+var logPath = flag.String("l", "tomcat", "configuration file to log")
 
-func main() {
-	newfile := logPath + time.Now().Format("0102") + ".log"
-	file, err := os.OpenFile(newfile, os.O_WRONLY|os.O_APPEND|os.O_CREATE, os.ModeAppend)
-	if err != nil {
-		err = fmt.Errorf("rotateLog open newfile %v err %v", newfile, err)
-		log.Error(err)
-		return
-	}
-	log.SetOutput(file)
-	log.SetOutputLevel(0)
+var tomcat = &Tomcat{}
+
+func init() {
 	flag.Parse()
-	tomcat := &Tomcat{}
+	utils.RouteLog(*logPath)
 	if err := conf.LoadEx(tomcat, *tomcatConf); err != nil {
 		log.Fatal("config.Load failed:", err)
 	}
+}
+
+func main() {
 	log.Info("start collect tomcat metric data")
 	metrics := []telegraf.Metric{}
 	input := models.NewRunningInput(tomcat, &models.InputConfig{})
@@ -47,7 +42,6 @@ func main() {
 	tomcat.Gather(acc)
 	datas := []map[string]interface{}{}
 
-	log.Println(acc.Metrics)
 	for _, metric := range acc.Metrics {
 		datas = append(datas, metric.Fields())
 	}
@@ -253,14 +247,3 @@ func (s *Tomcat) createHttpClient() (*http.Client, error) {
 
 	return client, nil
 }
-
-/*func init() {
-	inputs.Add("tomcat", func() telegraf.Input {
-		return &Tomcat{
-			URL:      "http://127.0.0.1:8080/manager/status/all?XML=true",
-			Username: "tomcat",
-			Password: "s3cret",
-			Timeout:  internal.Duration{Duration: 5 * time.Second},
-		}
-	})
-}*/

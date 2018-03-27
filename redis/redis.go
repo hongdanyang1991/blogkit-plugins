@@ -13,35 +13,32 @@ import (
 	"encoding/json"
 
 	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf"
-	"os"
 	"flag"
 	"github.com/qiniu/log"
 	"github.com/hongdanyang1991/blogkit-plugins/common/conf"
 	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/models"
 	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/agent"
+	"github.com/hongdanyang1991/blogkit-plugins/common/utils"
 )
 
-//var redisConf = flag.String("f", "plugins/redis/conf/tomcat.conf", "configuration file to load")
-//var logPath = "plugins/redis/log/log_tomcat"
+//var redisConf = flag.String("f", "plugins/redis/conf/redis.conf", "configuration file to load")
+//var logPath = "plugins/redis/log/redis_"
 
 var redisConf = flag.String("f", "redis.conf", "configuration file to load")
-var logPath = "log_redis"
+var logPath = flag.String("l", "redis", "configuration file to log")
+var redis = &Redis{}
 
-func main() {
-	newfile := logPath + time.Now().Format("0102") + ".log"
-	file, err := os.OpenFile(newfile, os.O_WRONLY|os.O_APPEND|os.O_CREATE, os.ModeAppend)
-	if err != nil {
-		err = fmt.Errorf("rotateLog open newfile %v err %v", newfile, err)
-		log.Error(err)
-		return
-	}
-	log.SetOutput(file)
-	log.SetOutputLevel(0)
+const defaultPort = "6379"
+
+func init() {
 	flag.Parse()
-	redis := &Redis{}
+	utils.RouteLog(*logPath)
 	if err := conf.LoadEx(redis, *redisConf); err != nil {
 		log.Fatal("config.Load failed:", err)
 	}
+}
+
+func main() {
 	log.Info("start collect redis metric data")
 	metrics := []telegraf.Metric{}
 	input := models.NewRunningInput(redis, &models.InputConfig{})
@@ -49,7 +46,6 @@ func main() {
 	redis.Gather(acc)
 	datas := []map[string]interface{}{}
 
-	log.Println(acc.Metrics)
 	for _, metric := range acc.Metrics {
 		datas = append(datas, metric.Fields())
 	}
@@ -97,7 +93,7 @@ var Tracking = map[string]string{
 
 var ErrProtocolError = errors.New("redis protocol error")
 
-const defaultPort = "6379"
+
 
 // Reads stats from all configured servers accumulates stats.
 // Returns one of the errors encountered while gather stats (if any).
@@ -105,7 +101,7 @@ func (r *Redis) Gather(acc telegraf.Accumulator) error {
 	if len(r.Servers) == 0 {
 		url := &url.URL{
 			Scheme: "tcp",
-			Host:   ":6379",
+			Host:   defaultPort,
 		}
 		r.gatherServer(url, acc)
 		return nil

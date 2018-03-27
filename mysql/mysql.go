@@ -21,44 +21,40 @@ import (
 	"github.com/hongdanyang1991/blogkit-plugins/common/conf"
 	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/agent"
 	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/models"
-	"os"
 	"io/ioutil"
+	"github.com/hongdanyang1991/blogkit-plugins/common/utils"
 )
 
 //var mysqlConf = flag.String("f", "plugins/mysql/conf/mysql.conf", "configuration file to load")
-//var logPath = "plugins/mysql/log/log"
+//var logPath = "plugins/mysql/log/mysql_"
 
 var mysqlConf = flag.String("f", "mysql.conf", "configuration file to load")
-var logPath = "log_mysql"
+var logPath = flag.String("l", "mysql", "configuration file to log")
+var m = &Mysql{}
 
-func main() {
-	newfile := logPath + time.Now().Format("0102") + ".log"
-	file, err := os.OpenFile(newfile, os.O_WRONLY|os.O_APPEND|os.O_CREATE, os.ModeAppend)
-	if err != nil {
-		err = fmt.Errorf("rotateLog open newfile %v err %v", newfile, err)
-		log.Error(err)
-		return
-	}
-	log.SetOutput(file)
-	log.SetOutputLevel(0)
+
+func init() {
 	flag.Parse()
-	mysql := &Mysql{}
-	if err := conf.LoadEx(mysql, *mysqlConf); err != nil {
+	utils.RouteLog(*logPath)
+	if err := conf.LoadEx(m, *mysqlConf); err != nil {
 		log.Fatal("config.Load failed:", err)
 	}
+}
+
+func main() {
 	currentTime := time.Now()
 	timeStr := currentTime.Format("2006-01-02 15:04:05.999999")
-	if mysql.LastGatherStagesStartTime == "" {
-		mysql.LastGatherStagesStartTime = timeStr
+	if m.LastGatherStatementsEndTime == "" {
+		m.LastGatherStatementsEndTime = timeStr
 	}
-	if mysql.LastGatherStatementsStartTime == "" {
-		mysql.LastGatherStatementsStartTime = timeStr
+	if m.LastGatherStagesEndTime == "" {
+		m.LastGatherStagesEndTime = timeStr
 	}
 	log.Info("start collect mysql metric data")
 	metrics := []telegraf.Metric{}
-	input := models.NewRunningInput(mysql, &models.InputConfig{})
+	input := models.NewRunningInput(m, &models.InputConfig{})
 	acc := agent.NewAccumulator(input, metrics)
-	mysql.Gather(acc)
+	m.Gather(acc)
 	datas := []map[string]interface{}{}
 
 	//log.Println(acc.Metrics)
@@ -71,7 +67,6 @@ func main() {
 		return
 	}
 	fmt.Println(string(data))
-	log.Println(string(data))
 }
 
 type Mysql struct {
@@ -101,13 +96,13 @@ type Mysql struct {
 	SSLKey                              string   `json:"ssl_key"`
 
 
-	version								string	 `json:"version"`
-	eventCollectionEnable				bool	 `json:"event_collection_enable"`
+	Version								string	 `json:"version"`
+	EventCollectionEnable				bool	 `json:"event_collection_enable"`
 	GatherEventsStatements			    bool     `json:"gather_events_statements"`
 	GatherEventsStages					bool     `json:"gather_events_stages"`
 
-	LastGatherStatementsStartTime		string	 `json:"last_gather_statements_start_time"`
-	LastGatherStagesStartTime			string	 `json:"last_gather_stages_start_time"`
+	LastGatherStatementsEndTime		string	 `json:"last_gather_statements_end_time"`
+	LastGatherStagesEndTime			string	 `json:"last_gather_stages_end_time"`
 }
 
 var sampleConfig = `
@@ -191,6 +186,7 @@ var (
 	lastT            time.Time
 	initDone         = false
 	scanIntervalSlow uint32
+	measurement      = "measurement"
 )
 
 func (m *Mysql) InitMysql() {
@@ -651,56 +647,60 @@ const (
 	`
 	eventStagesQuery_old = `
 		select statements.*,stages.event_name,stages.timer_wait stage_time from
-			(select a.start_time,a.thread_id,a.event_id,a.sql_time,a.digest_text,a.digest from
+			(select a.start_time,a.end_time,a.thread_id,a.event_id,a.sql_time,a.digest_text,a.digest from
 				(select date_sub(now(),INTERVAL (select VARIABLE_VALUE from information_schema.global_status where variable_name='UPTIME')-TIMER_START*10e-13 second) start_time
+				,date_sub(now(),INTERVAL (select VARIABLE_VALUE from information_schema.global_status where variable_name='UPTIME')-TIMER_END*10e-13 second) end_time
 				,thread_id
 				,event_id
 				,timer_wait  sql_time
 				,digest_text
 				,current_schema
 				,digest
-			from performance_schema.events_statements_history_long where digest_text is not null and current_schema is not null) a where a.start_time >  ? ) statements left join performance_schema.events_stages_history_long stages
-		on statements.event_id = stages.nesting_event_id where stages.event_name is not null and stages.timer_wait is not null order by statements.start_time
+			from performance_schema.events_statements_history_long where digest_text is not null and current_schema is not null) a where a.end_time > ? ) statements left join performance_schema.events_stages_history_long stages
+		on statements.event_id = stages.nesting_event_id where stages.event_name is not null and stages.timer_wait is not null order by statements.end_time
 	`
 	eventStatementsQuery_old = `
 		select statements.*,pro.processlist_user,pro.processlist_host,pro.processlist_db from
-			(select a.start_time,a.thread_id,a.event_id,a.sql_time,a.digest_text,a.digest from
+			(select a.start_time,a.end_time,a.thread_id,a.event_id,a.sql_time,a.digest_text,a.digest from
 				(select date_sub(now(),INTERVAL (select VARIABLE_VALUE from information_schema.global_status where variable_name='UPTIME')-TIMER_START*10e-13 second) start_time
+				,date_sub(now(),INTERVAL (select VARIABLE_VALUE from information_schema.global_status where variable_name='UPTIME')-TIMER_END*10e-13 second) end_time
 				,thread_id
 				,event_id
 				,timer_wait  sql_time
 				,digest_text
 				,current_schema
 				,digest
-			from performance_schema.events_statements_history_long where digest_text is not null and current_schema is not null) a where a.start_time >  ? ) statements left join performance_schema.threads pro
-		on statements.thread_id = pro.thread_id where pro.processlist_user is not null order by statements.start_time
+			from performance_schema.events_statements_history_long where digest_text is not null and current_schema is not null) a where a.end_time > ? ) statements left join performance_schema.threads pro
+		on statements.thread_id = pro.thread_id where pro.processlist_user is not null order by statements.end_time
 	`
 
 	eventStagesQuery = `
 		select statements.*,stages.event_name,stages.timer_wait stage_time from
-			(select a.start_time,a.thread_id,a.event_id,a.sql_time,a.digest_text,a.digest from
+			(select a.start_time,a.end_time,a.thread_id,a.event_id,a.sql_time,a.digest_text,a.digest from
 				(select date_sub(now(),INTERVAL (select VARIABLE_VALUE from performance_schema.global_status where variable_name='UPTIME')-TIMER_START*10e-13 second) start_time
+				,date_sub(now(),INTERVAL (select VARIABLE_VALUE from performance_schema.global_status where variable_name='UPTIME')-TIMER_END*10e-13 second) end_time
 				,thread_id
 				,event_id
 				,timer_wait  sql_time
 				,digest_text
 				,current_schema
 				,digest
-			from performance_schema.events_statements_history_long where digest_text is not null and current_schema is not null) a where a.start_time >  ? ) statements left join performance_schema.events_stages_history_long stages
-		on statements.event_id = stages.nesting_event_id where stages.event_name is not null and stages.timer_wait is not null order by statements.start_time
+			from performance_schema.events_statements_history_long where digest_text is not null and current_schema is not null) a where a.end_time > ? ) statements left join performance_schema.events_stages_history_long stages
+		on statements.event_id = stages.nesting_event_id where stages.event_name is not null and stages.timer_wait is not null order by statements.end_time
 	`
 	eventStatementsQuery = `
 		select statements.*,pro.processlist_user,pro.processlist_host,pro.processlist_db from
-			(select a.start_time,a.thread_id,a.event_id,a.sql_time,a.digest_text,a.digest from
+			(select a.start_time,a.end_time,a.thread_id,a.event_id,a.sql_time,a.digest_text,a.digest from
 				(select date_sub(now(),INTERVAL (select VARIABLE_VALUE from performance_schema.global_status where variable_name='UPTIME')-TIMER_START*10e-13 second) start_time
+				,date_sub(now(),INTERVAL (select VARIABLE_VALUE from performance_schema.global_status where variable_name='UPTIME')-TIMER_END*10e-13 second) end_time
 				,thread_id
 				,event_id
 				,timer_wait  sql_time
 				,digest_text
 				,current_schema
 				,digest
-			from performance_schema.events_statements_history_long where digest_text is not null and current_schema is not null) a where a.start_time >  ? ) statements left join performance_schema.threads pro
-		on statements.thread_id = pro.thd_id order by statements.start_time
+			from performance_schema.events_statements_history_long where digest_text is not null and current_schema is not null) a where a.end_time > ? ) statements left join performance_schema.threads pro
+		on statements.thread_id = pro.thread_id where pro.processlist_user is not null order by statements.end_time
 	`
 )
 
@@ -720,7 +720,9 @@ func (m *Mysql) gatherServer(serv string, acc telegraf.Accumulator) error {
 	if m.GatherGlobalStatus {
 		err = m.gatherGlobalStatuses(db, serv, acc)
 		if err != nil {
-			return err
+			log.Debugf("gatherGlobalStatuses error:", err)
+		} else {
+			log.Debugf("gatherGlobalStatuses success")
 		}
 	}
 
@@ -906,7 +908,8 @@ func (m *Mysql) gatherGlobalVariables(db *sql.DB, serv string, acc telegraf.Accu
 	// parse DSN and save server tag
 	servtag := getDSNTag(serv)
 	tags := map[string]string{"server": servtag}
-	fields := make(map[string]interface{})
+	//fields := make(map[string]interface{})
+	fields := map[string]interface{}{"server": servtag, measurement:"global_variable"}
 	for rows.Next() {
 		if err := rows.Scan(&key, &val); err != nil {
 			return err
@@ -1056,24 +1059,24 @@ func (m *Mysql) updateMysqlConfig() error {
 
 
 func (m *Mysql) prepareEventQuery(db *sql.DB) (float64, error) {
-	if !m.eventCollectionEnable {
+	if !m.EventCollectionEnable {
 		if _, err := db.Exec(eventCollectionInstrumentsEnableQuery); err != nil {
 			return 0, err
 		}
 		if _, err := db.Exec(eventCollectionConsumersEnableQuery); err != nil {
 			return 0, err
 		}
-		m.eventCollectionEnable = true
+		m.EventCollectionEnable = true
 	}
 
-	if m.version == "" {
+	if m.Version == "" {
 		version, err := getVersion(db)
 		if err != nil {
 			return  0, err
 		}
-		m.version = version
+		m.Version = version
 	}
-	version, err := strconv.ParseFloat(m.version[0 : 3], 32)
+	version, err := strconv.ParseFloat(m.Version[0 : 3], 32)
 	if err != nil {
 		return 0, err
 	}
@@ -1087,10 +1090,10 @@ func (m *Mysql) gatherEventsStatements(db *sql.DB, serv string, acc telegraf.Acc
 	}
 	var rows *sql.Rows
 	if version <= 5.6 {
-		rows, err = db.Query(eventStatementsQuery_old, m.LastGatherStatementsStartTime)
+		rows, err = db.Query(eventStatementsQuery_old, m.LastGatherStatementsEndTime)
 		//rows, err = db.Query(eventStatementsQuery_old, "2018-03-18 15:14:17.288512")
 	} else {
-		rows, err = db.Query(eventStatementsQuery, m.LastGatherStatementsStartTime)
+		rows, err = db.Query(eventStatementsQuery, m.LastGatherStatementsEndTime)
 	}
 	if err != nil {
 		return err
@@ -1098,6 +1101,7 @@ func (m *Mysql) gatherEventsStatements(db *sql.DB, serv string, acc telegraf.Acc
 	defer rows.Close()
 	var (
 		start_time		string
+		end_time		string
 		thread_id		uint64
 		event_id		uint64
 		sql_time		uint64
@@ -1112,15 +1116,16 @@ func (m *Mysql) gatherEventsStatements(db *sql.DB, serv string, acc telegraf.Acc
 
 	for rows.Next() {
 
-		err = rows.Scan(&start_time, &thread_id, &event_id, &sql_time, &digest_text, &digest, &processlist_user, &processlist_host, &processlist_db)
+		err = rows.Scan(&start_time, &end_time, &thread_id, &event_id, &sql_time, &digest_text, &digest, &processlist_user, &processlist_host, &processlist_db)
 		if err != nil {
 			return err
 		}
 
 		fields := map[string]interface{}{
 			"server":			servtag,
-			"measurements":		"eventsStatement",
+			measurement:		"events_statement",
 			"start_time":		start_time,
+			"end_time":			end_time,
 			"thread_id":		thread_id,
 			"event_id":			event_id,
 			"sql_time":			sql_time,
@@ -1134,7 +1139,7 @@ func (m *Mysql) gatherEventsStatements(db *sql.DB, serv string, acc telegraf.Acc
 		acc.AddFields("eventStatement", fields, tags)
 	}
 	if start_time != "" {
-		m.LastGatherStatementsStartTime = start_time
+		m.LastGatherStatementsEndTime = end_time
 	}
 
 	return nil
@@ -1147,10 +1152,10 @@ func (m *Mysql) gatherEventsStages(db *sql.DB, serv string, acc telegraf.Accumul
 	}
 	var rows *sql.Rows
 	if version <= 5.6 {
-		rows, err = db.Query(eventStagesQuery_old, m.LastGatherStagesStartTime)
+		rows, err = db.Query(eventStagesQuery_old, m.LastGatherStagesEndTime)
 		//rows, err = db.Query(eventStagesQuery_old, "2018-03-18 15:14:17.288512")
 	} else {
-		rows, err = db.Query(eventStagesQuery, m.LastGatherStagesStartTime)
+		rows, err = db.Query(eventStagesQuery, m.LastGatherStagesEndTime)
 	}
 	if err != nil {
 		return err
@@ -1158,6 +1163,7 @@ func (m *Mysql) gatherEventsStages(db *sql.DB, serv string, acc telegraf.Accumul
 	defer rows.Close()
 	var (
 		start_time		string
+		end_time		string
 		thread_id		uint64
 		event_id		uint64
 		sql_time		uint64
@@ -1170,14 +1176,15 @@ func (m *Mysql) gatherEventsStages(db *sql.DB, serv string, acc telegraf.Accumul
 	servtag = getDSNTag(serv)
 
 	for rows.Next() {
-		err = rows.Scan(&start_time, &thread_id, &event_id, &sql_time, &digest_text, &digest, &event_name, &stage_time)
+		err = rows.Scan(&start_time,&end_time, &thread_id, &event_id, &sql_time, &digest_text, &digest, &event_name, &stage_time)
 		if err != nil {
 			return err
 		}
 		fields := map[string]interface{}{
 			"server":		servtag,
-			"measurements": "eventsStage",
+			"measurements": "event_stage",
 			"start_time":	start_time,
+			"end_time":		end_time,
 			"thread_id":	thread_id,
 			"event_id":		event_id,
 			"sql_time":		sql_time,
@@ -1189,8 +1196,8 @@ func (m *Mysql) gatherEventsStages(db *sql.DB, serv string, acc telegraf.Accumul
 		tags := map[string]string{}
 		acc.AddFields("eventStage", fields, tags)
 	}
-	if start_time != "" {
-		m.LastGatherStagesStartTime = start_time
+	if end_time != "" {
+		m.LastGatherStagesEndTime = end_time
 	}
 	return nil
 }
@@ -1218,7 +1225,7 @@ func (m *Mysql) gatherGlobalStatuses(db *sql.DB, serv string, acc telegraf.Accum
 	//tags := map[string]string{"server": servtag}
 	//fields := make(map[string]interface{})
 	tags := map[string]string{"server": servtag}
-	fields := map[string]interface{}{"server": servtag}
+	fields := map[string]interface{}{"server": servtag, measurement: "global_status"}
 	for rows.Next() {
 		var name string
 		var val interface{}
@@ -1327,7 +1334,7 @@ func (m *Mysql) gatherGlobalStatuses(db *sql.DB, serv string, acc telegraf.Accum
 	}
 
 	// gather connection metrics from user_statistics for each user
-	if m.GatherUserStatistics {
+/*	if m.GatherUserStatistics {
 		conn_rows, err := db.Query("select user, total_connections, concurrent_connections, connected_time, busy_time, cpu_time, bytes_received, bytes_sent, binlog_bytes_written, rows_fetched, rows_updated, table_rows_read, select_commands, update_commands, other_commands, commit_transactions, rollback_transactions, denied_connections, lost_connections, access_denied, empty_queries, total_ssl_connections FROM INFORMATION_SCHEMA.USER_STATISTICS GROUP BY user")
 		if err != nil {
 			log.Printf("MySQL Error gathering user stats: %s", err)
@@ -1395,7 +1402,7 @@ func (m *Mysql) gatherGlobalStatuses(db *sql.DB, serv string, acc telegraf.Accum
 				acc.AddFields("mysql_user_stats", fields, tags)
 			}
 		}
-	}
+	}*/
 
 	return nil
 }
