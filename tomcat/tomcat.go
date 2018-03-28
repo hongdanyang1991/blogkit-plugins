@@ -18,11 +18,8 @@ import (
 	"github.com/hongdanyang1991/blogkit-plugins/common/utils"
 )
 
-//var tomcatConf = flag.String("f", "plugins/tomcat/conf/tomcat.conf", "configuration file to load")
-//var logPath = "plugins/tomcat/log/tomcat_"
-
-var tomcatConf = flag.String("f", "tomcat.conf", "configuration file to load")
-var logPath = flag.String("l", "tomcat", "configuration file to log")
+var tomcatConf = flag.String("f", "conf/tomcat.conf", "configuration file to load")
+var logPath = flag.String("l", "log/tomcat", "configuration file to log")
 
 var tomcat = &Tomcat{}
 
