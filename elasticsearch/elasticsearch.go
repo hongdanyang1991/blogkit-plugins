@@ -13,35 +13,28 @@ import (
 	"sync"
 	"time"
 	"flag"
-	"os"
 	"github.com/qiniu/log"
 	"github.com/hongdanyang1991/blogkit-plugins/common/conf"
 	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/models"
 	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/agent"
+	"github.com/hongdanyang1991/blogkit-plugins/common/utils"
 )
 
-//var elasticConf = flag.String("f", "plugins/elasticsearch/conf/tomcat.conf", "configuration file to load")
-//var logPath = "plugins/elasticsearch/log/log_tomcat"
+var elasticConf = flag.String("f", "conf/elasticsearch.conf", "configuration file to load")
+var logPath = flag.String("l", "log/elastic", "configuration file to log")
 
-var elasticConf = flag.String("f", "elasticsearch.conf", "configuration file to load")
-var logPath = "log_elastic"
+var elastic = &Elasticsearch{}
 
-
-func main() {
-	newfile := logPath + time.Now().Format("0102") + ".log"
-	file, err := os.OpenFile(newfile, os.O_WRONLY|os.O_APPEND|os.O_CREATE, os.ModeAppend)
-	if err != nil {
-		err = fmt.Errorf("rotateLog open newfile %v err %v", newfile, err)
-		log.Error(err)
-		return
-	}
-	log.SetOutput(file)
-	log.SetOutputLevel(0)
+func init() {
 	flag.Parse()
-	elastic := &Elasticsearch{}
+	utils.RouteLog(*logPath)
 	if err := conf.LoadEx(elastic, *elasticConf); err != nil {
 		log.Fatal("config.Load failed:", err)
 	}
+}
+
+func main() {
+	flag.Parse()
 	log.Info("start collect elasticsearch metric data")
 	metrics := []telegraf.Metric{}
 	input := models.NewRunningInput(elastic, &models.InputConfig{})

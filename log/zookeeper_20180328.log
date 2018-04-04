@@ -1,0 +1,7 @@
+2018/03/28 15:47:36 [INFO][github.com/hongdanyang1991/blogkit-plugins/zookeeper] zookeeper.go:36: start collect zookeeper metric data
+2018/03/28 15:47:36 [INFO][github.com/hongdanyang1991/blogkit-plugins/common/telegraf/agent] accumulator.go:109: E! Error in plugin [inputs.]: dial tcp: address tcp://172.16.3.117:12181:2181: too many colons in address
+2018/03/28 15:48:22 [INFO][github.com/hongdanyang1991/blogkit-plugins/zookeeper] zookeeper.go:36: start collect zookeeper metric data
+2018/03/28 15:48:55 [INFO][github.com/hongdanyang1991/blogkit-plugins/zookeeper] zookeeper.go:36: start collect zookeeper metric data
+2018/03/28 15:50:50 [INFO][github.com/hongdanyang1991/blogkit-plugins/zookeeper] zookeeper.go:36: start collect zookeeper metric data
+2018/03/28 15:50:50 [INFO][github.com/hongdanyang1991/blogkit-plugins/common/telegraf/agent] accumulator.go:109: E! Error in plugin [inputs.]: unexpected line in mntr response: "mntr is not executed because it is not in the whitelist."
+2018/03/28 15:52:49 [INFO][github.com/hongdanyang1991/blogkit-plugins/zookeeper] zookeeper.go:36: start collect zookeeper metric data

@@ -21,11 +21,8 @@ import (
 	"github.com/hongdanyang1991/blogkit-plugins/common/utils"
 )
 
-//var redisConf = flag.String("f", "plugins/redis/conf/redis.conf", "configuration file to load")
-//var logPath = "plugins/redis/log/redis_"
-
-var redisConf = flag.String("f", "redis.conf", "configuration file to load")
-var logPath = flag.String("l", "redis", "configuration file to log")
+var redisConf = flag.String("f", "conf/redis.conf", "configuration file to load")
+var logPath = flag.String("l", "log/redis", "configuration file to log")
 var redis = &Redis{}
 
 const defaultPort = "6379"

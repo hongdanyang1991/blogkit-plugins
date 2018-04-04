@@ -1,4 +1,4 @@
-package zookeeper
+package main
 
 import (
 	"bufio"
@@ -9,10 +9,49 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"encoding/json"
+	"flag"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/qiniu/log"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf"
+	"github.com/hongdanyang1991/blogkit-plugins/common/utils"
+	"github.com/hongdanyang1991/blogkit-plugins/common/conf"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/models"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/agent"
 )
+
+var zookeeperConf = flag.String("f", "conf/zookeeper.conf", "configuration file to load")
+var logPath = flag.String("l", "log/zookeeper", "configuration file to log")
+var zookeeper = &Zookeeper{}
+
+func init() {
+	flag.Parse()
+	utils.RouteLog(*logPath)
+	if err := conf.LoadEx(zookeeper, *zookeeperConf); err != nil {
+		log.Fatal("config.Load failed:", err)
+	}
+}
+
+func main() {
+	log.Info("start collect zookeeper metric data")
+	metrics := []telegraf.Metric{}
+	input := models.NewRunningInput(zookeeper, &models.InputConfig{})
+	acc := agent.NewAccumulator(input, metrics)
+	zookeeper.Gather(acc)
+	datas := []map[string]interface{}{}
+
+	for _, metric := range acc.Metrics {
+		datas = append(datas, metric.Fields())
+	}
+	data, err := json.Marshal(datas)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(data))
+
+}
+
 
 // Zookeeper is a zookeeper plugin
 type Zookeeper struct {
@@ -113,8 +152,3 @@ func (z *Zookeeper) gatherServer(address string, acc telegraf.Accumulator) error
 	return nil
 }
 
-func init() {
-	inputs.Add("zookeeper", func() telegraf.Input {
-		return &Zookeeper{}
-	})
-}

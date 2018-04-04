@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/mysql/mysql.go" line="639" />
+    <bookmark url="file://$PROJECT_DIR$/mysql/mysql.go" line="636" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b6cc490e-9494-4bfd-9516-2f9ce0008f55" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/common/utils/log_util.go" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/common/utils/util.go" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/kafka/kafka.go" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/kafka/monitor/monitor.go" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mysql.conf" afterPath="$PROJECT_DIR$/mysql.conf" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/conf/redis.conf" afterPath="$PROJECT_DIR$/conf/redis.conf" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/conf/zookeeper.conf" afterPath="$PROJECT_DIR$/conf/zookeeper.conf" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/elasticsearch/elasticsearch.go" afterPath="$PROJECT_DIR$/elasticsearch/elasticsearch.go" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mysql/mysql.go" afterPath="$PROJECT_DIR$/mysql/mysql.go" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/redis/redis.go" afterPath="$PROJECT_DIR$/redis/redis.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tomcat/tomcat.go" afterPath="$PROJECT_DIR$/tomcat/tomcat.go" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/zookeeper/zookeeper.go" afterPath="$PROJECT_DIR$/zookeeper/zookeeper.go" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -21,148 +23,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.44507575">
-      <split-first>
-        <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
-          <file leaf-file-name="mysql.go" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/mysql/mysql.go">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="296">
-                  <caret line="52" column="42" lean-forward="false" selection-start-line="52" selection-start-column="42" selection-end-line="52" selection-end-column="42" />
-                  <folding>
-                    <element signature="e#14#593#0" expanded="true" />
-                    <marker date="1522143247234" expanded="true" signature="38359:38428" ph="SELECT user,... PROCESSLIST" />
-                    <marker date="1522143247234" expanded="true" signature="39088:39513" ph="select user,... USER_STATISTICS" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="redis.go" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/redis/redis.go">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="81">
-                  <caret line="27" column="68" lean-forward="false" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="68" />
-                  <folding>
-                    <element signature="e#14#472#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="util.go" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/common/utils/util.go">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="270">
-                  <caret line="10" column="1" lean-forward="false" selection-start-line="10" selection-start-column="1" selection-end-line="10" selection-end-column="1" />
-                  <folding>
-                    <element signature="e#15#49#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="tomcat.go" pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/tomcat/tomcat.go">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="270">
-                  <caret line="43" column="0" lean-forward="false" selection-start-line="43" selection-start-column="0" selection-end-line="43" selection-end-column="0" />
-                  <folding>
-                    <element signature="e#14#500#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="redis.conf" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/redis.conf">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="54">
-                  <caret line="2" column="1" lean-forward="false" selection-start-line="2" selection-start-column="1" selection-end-line="2" selection-end-column="1" />
-                  <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="tomcat.conf" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/tomcat.conf">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="108">
-                  <caret line="4" column="1" lean-forward="false" selection-start-line="4" selection-start-column="1" selection-end-line="4" selection-end-column="1" />
-                  <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-        </leaf>
-      </split-first>
-      <split-second>
-        <leaf>
-          <file leaf-file-name="log_util.go" pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/common/utils/log_util.go">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="297">
-                  <caret line="17" column="5" lean-forward="false" selection-start-line="17" selection-start-column="5" selection-end-line="17" selection-end-column="5" />
-                  <folding>
-                    <element signature="e#15#87#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="format.go" pinned="false" current-in-tab="false">
-            <entry file="file://C:/MyPrograms/Work/Go/src/time/format.go">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="409">
-                  <caret line="486" column="29" lean-forward="false" selection-start-line="486" selection-start-column="29" selection-end-line="486" selection-end-column="29" />
-                  <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="path.go" pinned="false" current-in-tab="false">
-            <entry file="file://C:/MyPrograms/Work/Go/src/path/filepath/path.go">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="292">
-                  <caret line="240" column="12" lean-forward="false" selection-start-line="240" selection-start-column="12" selection-end-line="240" selection-end-column="12" />
-                  <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="path_windows.go" pinned="false" current-in-tab="false">
-            <entry file="file://C:/MyPrograms/Work/Go/src/path/filepath/path_windows.go">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="301">
-                  <caret line="111" column="35" lean-forward="false" selection-start-line="111" selection-start-column="35" selection-end-line="111" selection-end-column="35" />
-                  <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="exec_windows.go" pinned="false" current-in-tab="false">
-            <entry file="file://C:/MyPrograms/Work/Go/src/syscall/exec_windows.go">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="301">
-                  <caret line="133" column="10" lean-forward="false" selection-start-line="133" selection-start-column="7" selection-end-line="133" selection-end-column="10" />
-                  <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="error.go" pinned="false" current-in-tab="false">
-            <entry file="file://C:/MyPrograms/Work/Go/src/os/error.go">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="211">
-                  <caret line="54" column="12" lean-forward="false" selection-start-line="54" selection-start-column="12" selection-end-line="54" selection-end-column="12" />
-                  <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-        </leaf>
-      </split-second>
-    </splitter>
+    <leaf />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -173,7 +34,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>commands_check</find>
       <find>commands_commit</find>
       <find>innodb_row_lock_current_waits</find>
       <find>select</find>
@@ -203,6 +63,7 @@
       <find>pro.thd_id</find>
       <find>LastGatherStagesEndTime</find>
       <find>measurement</find>
+      <find>sample</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -245,7 +106,6 @@
         <option value="$PROJECT_DIR$/tomcat/tomcat_test.go" />
         <option value="$PROJECT_DIR$/tomcat.conf" />
         <option value="$PROJECT_DIR$/common/telegraf/plugins/parsers/json/parser.go" />
-        <option value="$PROJECT_DIR$/elasticsearch/elasticsearch.go" />
         <option value="$PROJECT_DIR$/elasticsearch.conf" />
         <option value="$PROJECT_DIR$/redis.conf" />
         <option value="$PROJECT_DIR$/log_mysql0316.log" />
@@ -253,10 +113,17 @@
         <option value="$PROJECT_DIR$/mysql.conf" />
         <option value="$PROJECT_DIR$/common/log/log.go" />
         <option value="$PROJECT_DIR$/common/utils/util.go" />
-        <option value="$PROJECT_DIR$/redis/redis.go" />
         <option value="$PROJECT_DIR$/common/utils/log_util.go" />
-        <option value="$PROJECT_DIR$/mysql/mysql.go" />
+        <option value="$PROJECT_DIR$/elasticsearch/elasticsearch.go" />
+        <option value="$PROJECT_DIR$/redis/redis.go" />
         <option value="$PROJECT_DIR$/tomcat/tomcat.go" />
+        <option value="$PROJECT_DIR$/conf/redis.conf" />
+        <option value="$PROJECT_DIR$/conf/zookeeper.conf" />
+        <option value="$PROJECT_DIR$/zookeeper/zookeeper.go" />
+        <option value="$PROJECT_DIR$/kafka/monitor/monitor.go" />
+        <option value="$PROJECT_DIR$/kafka/main.go" />
+        <option value="$PROJECT_DIR$/kafka/kafka.go" />
+        <option value="$PROJECT_DIR$/mysql/mysql.go" />
       </list>
     </option>
   </component>
@@ -267,8 +134,7 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="984" />
-    <option name="y" value="72" />
+    <option name="x" value="-6" />
     <option name="width" value="976" />
     <option name="height" value="994" />
   </component>
@@ -287,8 +153,10 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
+      <pane id="Scope" />
       <pane id="AndroidView" />
+      <pane id="PackagesPane" />
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -299,30 +167,28 @@
             <path>
               <item name="blogkit-plugins" type="b2602c69:ProjectViewProjectNode" />
               <item name="blogkit-plugins" type="462c0819:PsiDirectoryNode" />
-              <item name="common" type="462c0819:PsiDirectoryNode" />
+              <item name="kafka" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="blogkit-plugins" type="b2602c69:ProjectViewProjectNode" />
               <item name="blogkit-plugins" type="462c0819:PsiDirectoryNode" />
-              <item name="common" type="462c0819:PsiDirectoryNode" />
-              <item name="utils" type="462c0819:PsiDirectoryNode" />
+              <item name="kafka" type="462c0819:PsiDirectoryNode" />
+              <item name="monitor" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="blogkit-plugins" type="b2602c69:ProjectViewProjectNode" />
+              <item name="blogkit-plugins" type="462c0819:PsiDirectoryNode" />
+              <item name="mysql" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="blogkit-plugins" type="b2602c69:ProjectViewProjectNode" />
               <item name="blogkit-plugins" type="462c0819:PsiDirectoryNode" />
               <item name="redis" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="blogkit-plugins" type="b2602c69:ProjectViewProjectNode" />
-              <item name="blogkit-plugins" type="462c0819:PsiDirectoryNode" />
-              <item name="tomcat" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -335,16 +201,17 @@
     <property name="SearchEverywhereHistoryKey" value="true&#9;null&#9;null" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="E:\Go\GOPATH\src\github.com\hongdanyang1991\blogkit-plugins\common\telegraf" />
-      <recent name="E:\Go\GOPATH\src\github.com\hongdanyang1991\blogkit-plugins\mysql\mysql" />
-      <recent name="E:\Go\GOPATH\src\github.com\hongdanyang1991\blogkit-plugins\mysql" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\Go\GOPATH\src\github.com\hongdanyang1991\blogkit-plugins\zookeeper" />
       <recent name="E:\Go\GOPATH\src\github.com\hongdanyang1991\blogkit-plugins\redis" />
       <recent name="E:\Go\GOPATH\src\github.com\hongdanyang1991\blogkit-plugins\common\telegraf\plugins\parsers" />
       <recent name="E:\Go\GOPATH\src\github.com\hongdanyang1991\blogkit-plugins\elasticsearch" />
       <recent name="E:\Go\GOPATH\src\github.com\hongdanyang1991\blogkit-plugins\tomcat" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\Go\GOPATH\src\github.com\hongdanyang1991\blogkit-plugins\conf" />
+      <recent name="E:\Go\GOPATH\src\github.com\hongdanyang1991\blogkit-plugins\common\telegraf" />
+      <recent name="E:\Go\GOPATH\src\github.com\hongdanyang1991\blogkit-plugins\mysql\mysql" />
       <recent name="E:\Go\GOPATH\src\github.com\hongdanyang1991\blogkit-plugins\mysql" />
     </key>
   </component>
@@ -360,7 +227,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Go Application.mysql.go">
+  <component name="RunManager" selected="Go Application.zookeeper.go">
     <configuration default="true" type="Applet" factoryName="Applet">
       <option name="WIDTH" value="400" />
       <option name="HEIGHT" value="300" />
@@ -494,29 +361,29 @@
       <package value="github.com/hongdanyang1991/blogkit-plugins" />
       <directory value="$PROJECT_DIR$" />
     </configuration>
-    <configuration name="tomcat_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
+    <configuration name="zookeeper.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true">
       <module name="blogkit-plugins" />
-      <working_directory value="$PROJECT_DIR$/tomcat" />
+      <working_directory value="$PROJECT_DIR$" />
       <go_parameters value="-i" />
-      <framework value="gotest" />
       <kind value="FILE" />
+      <filePath value="$PROJECT_DIR$/zookeeper/zookeeper.go" />
       <package value="github.com/hongdanyang1991/blogkit-plugins" />
-      <filePath value="$PROJECT_DIR$/tomcat/tomcat_test.go" />
+      <directory value="$PROJECT_DIR$" />
     </configuration>
     <list size="5">
       <item index="0" class="java.lang.String" itemvalue="Go Application.mysql.go" />
-      <item index="1" class="java.lang.String" itemvalue="Go Test.tomcat_test.go" />
-      <item index="2" class="java.lang.String" itemvalue="Go Application.tomcat.go" />
-      <item index="3" class="java.lang.String" itemvalue="Go Application.elasticsearch.go" />
-      <item index="4" class="java.lang.String" itemvalue="Go Application.redis.go" />
+      <item index="1" class="java.lang.String" itemvalue="Go Application.tomcat.go" />
+      <item index="2" class="java.lang.String" itemvalue="Go Application.elasticsearch.go" />
+      <item index="3" class="java.lang.String" itemvalue="Go Application.redis.go" />
+      <item index="4" class="java.lang.String" itemvalue="Go Application.zookeeper.go" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Go Application.mysql.go" />
-        <item index="1" class="java.lang.String" itemvalue="Go Application.tomcat.go" />
-        <item index="2" class="java.lang.String" itemvalue="Go Application.redis.go" />
-        <item index="3" class="java.lang.String" itemvalue="Go Application.elasticsearch.go" />
-        <item index="4" class="java.lang.String" itemvalue="Go Test.tomcat_test.go" />
+        <item index="0" class="java.lang.String" itemvalue="Go Application.zookeeper.go" />
+        <item index="1" class="java.lang.String" itemvalue="Go Application.redis.go" />
+        <item index="2" class="java.lang.String" itemvalue="Go Application.elasticsearch.go" />
+        <item index="3" class="java.lang.String" itemvalue="Go Application.mysql.go" />
+        <item index="4" class="java.lang.String" itemvalue="Go Application.tomcat.go" />
       </list>
     </recent_temporary>
   </component>
@@ -568,7 +435,14 @@
       <workItem from="1521508352828" duration="19971000" />
       <workItem from="1521595206067" duration="8711000" />
       <workItem from="1521687883701" duration="8025000" />
-      <workItem from="1522114796504" duration="17599000" />
+      <workItem from="1522114796504" duration="18439000" />
+      <workItem from="1522199965031" duration="7577000" />
+      <workItem from="1522286732495" duration="2651000" />
+      <workItem from="1522401537856" duration="395000" />
+      <workItem from="1522639224340" duration="4939000" />
+      <workItem from="1522717904230" duration="3154000" />
+      <workItem from="1522806252163" duration="2835000" />
+      <workItem from="1522828261138" duration="22000" />
     </task>
     <servers />
   </component>
@@ -605,7 +479,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="269969000" />
+    <option name="totallyTimeSpent" value="292382000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1050" extended-state="6" />
@@ -619,10 +493,10 @@
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2708089" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32942554" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24032825" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3481829" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1511254" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.11789925" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24973205" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -652,22 +526,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/../../qiniu/log/logext_test.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="124">
-          <caret line="22" column="24" lean-forward="false" selection-start-line="22" selection-start-column="19" selection-end-line="22" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/log0306032124" />
-    <entry file="file://$PROJECT_DIR$/log0306032104" />
-    <entry file="file://C:/MyPrograms/Work/Go/src/os/file_windows.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="151" column="34" lean-forward="false" selection-start-line="151" selection-start-column="30" selection-end-line="151" selection-end-column="34" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../../qiniu/log/logext.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="513">
@@ -709,49 +567,14 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../../qiniu/logkit/vendor/github.com/json-iterator/go/feature_any_bool.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="54">
-          <caret line="2" column="5" lean-forward="false" selection-start-line="2" selection-start-column="5" selection-end-line="2" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/elasticsearch.conf">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="27">
-          <caret line="1" column="32" lean-forward="false" selection-start-line="1" selection-start-column="32" selection-end-line="1" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/../../qiniu/logkit/vendor/github.com/json-iterator/go/feature_any_bool.go" />
     <entry file="file://$PROJECT_DIR$/log_elastic0313.log" />
-    <entry file="file://$PROJECT_DIR$/elasticsearch/elasticsearch.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="81">
-          <caret line="3" column="4" lean-forward="false" selection-start-line="3" selection-start-column="4" selection-end-line="3" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/log_mysql0316.log" />
     <entry file="file://$PROJECT_DIR$/log_mysql0319.log" />
     <entry file="file://C:/MyPrograms/Work/Go/src/time/time.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="27">
           <caret line="115" column="5" lean-forward="false" selection-start-line="115" selection-start-column="5" selection-end-line="115" selection-end-column="5" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/common/telegraf/input.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="54">
-          <caret line="2" column="10" lean-forward="false" selection-start-line="2" selection-start-column="5" selection-end-line="2" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/common/telegraf/models/running_input.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="61" column="13" lean-forward="false" selection-start-line="61" selection-start-column="13" selection-end-line="61" selection-end-column="13" />
         </state>
       </provider>
     </entry>
@@ -805,15 +628,7 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/log_mysql0321.log" />
-    <entry file="file://$PROJECT_DIR$/redis.conf">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="54">
-          <caret line="2" column="1" lean-forward="false" selection-start-line="2" selection-start-column="1" selection-end-line="2" selection-end-column="1" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mysql.conf">
+    <entry file="file://$PROJECT_DIR$/conf/mysql.conf">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="567">
           <caret line="21" column="21" lean-forward="false" selection-start-line="21" selection-start-column="21" selection-end-line="21" selection-end-column="21" />
@@ -824,23 +639,14 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-3429">
           <caret line="11" column="15" lean-forward="false" selection-start-line="11" selection-start-column="15" selection-end-line="11" selection-end-column="15" />
-          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/common/log/log.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="74">
-          <caret line="15" column="35" lean-forward="false" selection-start-line="15" selection-start-column="35" selection-end-line="15" selection-end-column="35" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/common/log/log.go" />
     <entry file="file://C:/MyPrograms/Work/Go/src/builtin/builtin.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="150">
           <caret line="69" column="15" lean-forward="true" selection-start-line="69" selection-start-column="15" selection-end-line="69" selection-end-column="15" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -848,15 +654,13 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="27">
           <caret line="1385" column="14" lean-forward="false" selection-start-line="1385" selection-start-column="14" selection-end-line="1385" selection-end-column="14" />
-          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tomcat.conf">
+    <entry file="file://$PROJECT_DIR$/conf/tomcat.conf">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="108">
           <caret line="4" column="1" lean-forward="false" selection-start-line="4" selection-start-column="1" selection-end-line="4" selection-end-column="1" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -864,7 +668,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="211">
           <caret line="54" column="12" lean-forward="false" selection-start-line="54" selection-start-column="12" selection-end-line="54" selection-end-column="12" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -872,7 +675,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="292">
           <caret line="240" column="12" lean-forward="false" selection-start-line="240" selection-start-column="12" selection-end-line="240" selection-end-column="12" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -880,7 +682,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="301">
           <caret line="111" column="35" lean-forward="false" selection-start-line="111" selection-start-column="35" selection-end-line="111" selection-end-column="35" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -888,7 +689,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="301">
           <caret line="133" column="10" lean-forward="false" selection-start-line="133" selection-start-column="7" selection-end-line="133" selection-end-column="10" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -896,9 +696,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="270">
           <caret line="10" column="1" lean-forward="false" selection-start-line="10" selection-start-column="1" selection-end-line="10" selection-end-column="1" />
-          <folding>
-            <element signature="e#15#49#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -906,62 +703,103 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="409">
           <caret line="486" column="29" lean-forward="false" selection-start-line="486" selection-start-column="29" selection-end-line="486" selection-end-column="29" />
-          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/redis_0327.log">
-      <provider selected="true" editor-type-id="LogFileEditorProvider">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/redis_20180327.log">
-      <provider selected="true" editor-type-id="LogFileEditorProvider">
-        <state relative-caret-position="27">
-          <caret line="1" column="91" lean-forward="false" selection-start-line="1" selection-start-column="91" selection-end-line="1" selection-end-column="91" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/redis_0327.log" />
+    <entry file="file://$PROJECT_DIR$/redis_20180327.log" />
     <entry file="file://$PROJECT_DIR$/common/utils/log_util.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="297">
           <caret line="17" column="5" lean-forward="false" selection-start-line="17" selection-start-column="5" selection-end-line="17" selection-end-column="5" />
-          <folding>
-            <element signature="e#15#87#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/redis/redis.go">
+    <entry file="file://$PROJECT_DIR$/conf/zookeeper.conf">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="81">
-          <caret line="27" column="68" lean-forward="false" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="68" />
-          <folding>
-            <element signature="e#14#472#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="54">
+          <caret line="2" column="1" lean-forward="true" selection-start-line="2" selection-start-column="1" selection-end-line="2" selection-end-column="1" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/mysql/mysql.go">
+    <entry file="file://$PROJECT_DIR$/conf/redis.conf">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="296">
-          <caret line="52" column="42" lean-forward="false" selection-start-line="52" selection-start-column="42" selection-end-line="52" selection-end-column="42" />
-          <folding>
-            <element signature="e#14#593#0" expanded="true" />
-            <marker date="1522143247234" expanded="true" signature="38359:38428" ph="SELECT user,... PROCESSLIST" />
-            <marker date="1522143247234" expanded="true" signature="39088:39513" ph="select user,... USER_STATISTICS" />
-          </folding>
+        <state relative-caret-position="27">
+          <caret line="1" column="15" lean-forward="false" selection-start-line="1" selection-start-column="15" selection-end-line="1" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/elasticsearch/elasticsearch.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="324">
+          <caret line="30" column="56" lean-forward="false" selection-start-line="30" selection-start-column="56" selection-end-line="30" selection-end-column="56" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/conf/elasticsearch.conf">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="108">
+          <caret line="4" column="1" lean-forward="false" selection-start-line="4" selection-start-column="1" selection-end-line="4" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/zookeeper/zookeeper.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="12" lean-forward="true" selection-start-line="0" selection-start-column="12" selection-end-line="0" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/kafka/monitor/monitor.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="15" lean-forward="false" selection-start-line="0" selection-start-column="15" selection-end-line="0" selection-end-column="15" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/tomcat/tomcat.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="43" column="0" lean-forward="false" selection-start-line="43" selection-start-column="0" selection-end-line="43" selection-end-column="0" />
+        <state relative-caret-position="3348">
+          <caret line="140" column="0" lean-forward="false" selection-start-line="140" selection-start-column="0" selection-end-line="140" selection-end-column="57" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common/telegraf/models/running_input.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="459">
+          <caret line="23" column="22" lean-forward="false" selection-start-line="23" selection-start-column="22" selection-end-line="23" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common/telegraf/input.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="297">
+          <caret line="11" column="10" lean-forward="false" selection-start-line="11" selection-start-column="4" selection-end-line="11" selection-end-column="10" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/kafka/kafka.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="459">
+          <caret line="44" column="19" lean-forward="false" selection-start-line="44" selection-start-column="19" selection-end-line="44" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/redis/redis.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2673">
+          <caret line="118" column="13" lean-forward="false" selection-start-line="118" selection-start-column="12" selection-end-line="118" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mysql/mysql.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="27">
+          <caret line="1508" column="51" lean-forward="false" selection-start-line="1508" selection-start-column="51" selection-end-line="1508" selection-end-column="51" />
           <folding>
-            <element signature="e#14#500#0" expanded="true" />
+            <element signature="e#14#593#0" expanded="true" />
+            <marker date="1522746731859" expanded="true" signature="38226:38295" ph="SELECT user,... PROCESSLIST" />
+            <marker date="1522746731859" expanded="true" signature="38955:39380" ph="select user,... USER_STATISTICS" />
           </folding>
         </state>
       </provider>

@@ -25,11 +25,8 @@ import (
 	"github.com/hongdanyang1991/blogkit-plugins/common/utils"
 )
 
-//var mysqlConf = flag.String("f", "plugins/mysql/conf/mysql.conf", "configuration file to load")
-//var logPath = "plugins/mysql/log/mysql_"
-
-var mysqlConf = flag.String("f", "mysql.conf", "configuration file to load")
-var logPath = flag.String("l", "mysql", "configuration file to log")
+var mysqlConf = flag.String("f", "conf/mysql.conf", "configuration file to load")
+var logPath = flag.String("l", "log/mysql", "configuration file to log")
 var m = &Mysql{}
 
 
@@ -1501,7 +1498,6 @@ func (m *Mysql) GatherUserStatisticsStatuses(db *sql.DB, serv string, acc telegr
 
 		tags := map[string]string{"server": servtag, "user": user}
 		fields := map[string]interface{}{
-
 			"total_connections":      total_connections,
 			"concurrent_connections": concurrent_connections,
 			"connected_time":         connected_time,
