@@ -29,6 +29,10 @@ func init() {
 	if err := conf.LoadEx(kafka, *kafkaConf); err != nil {
 		log.Fatal("config.Load failed:", err)
 	}
+	kafka.brokers = strings.Split(kafka.Brokers, ",")
+	kafka.groups = strings.Split(kafka.Groups, ",")
+	kafka.topics = strings.Split(kafka.Topics, ",")
+
 }
 
 func main() {
@@ -54,8 +58,8 @@ type Kafka struct {
 	ZkAddr		string `json:"zookeeper_address"`
 	BasePath	string `json:"base_path"`
 	Brokers		string `json:"brokers"`
-	Topics      string `json:topics`
-	Groups		string `json:groups`
+	Topics      string `json:"topics""`
+	Groups		string `json:"groups""`
 	Version     string `json:"version"`
 	client      sarama.Client
 	topics      []string
@@ -64,9 +68,9 @@ type Kafka struct {
 }
 
 func (k *Kafka) Gather(acc telegraf.Accumulator) error {
-	brokers := strings.Split(k.Brokers, ",")
+	brokers := k.brokers
 	sort.Sort(sort.StringSlice(brokers))
-	kafkaVersions := kafkaVersion()
+	kafkaVersions := KafkaVersion()
 	k.client = newSaramaClient(brokers, kafkaVersions[k.Version])
 	k.gatherBrokerOffsets(acc)
 	k.gatherBrokerMetadata(acc)
@@ -175,6 +179,15 @@ func (k *Kafka) gatherBrokerMetadata(acc telegraf.Accumulator) {
 	}
 
 	response, err := broker.GetMetadata(&sarama.MetadataRequest{})
+
+/*	for _, topic := range response.Topics {
+		fmt.Println(topic)
+	}
+	for _, broker := range response.Brokers {
+		fmt.Println(broker)
+	}*/
+
+
 	if err != nil {
 		log.Error(fmt.Sprintf("monitor: cannot get metadata: %v", err))
 		return
@@ -367,10 +380,7 @@ func (k *Kafka) Description() string {
 }
 
 
-
-
-
-func kafkaVersion() map[string]sarama.KafkaVersion {
+func KafkaVersion() map[string]sarama.KafkaVersion {
 	m := make(map[string]sarama.KafkaVersion)
 	m["0.8.2.0"] = sarama.V0_8_2_0
 	m["0.8.2.1"] = sarama.V0_8_2_1
@@ -380,6 +390,12 @@ func kafkaVersion() map[string]sarama.KafkaVersion {
 	m["0.10.0.0"] = sarama.V0_10_0_0
 	m["0.10.0.1"] = sarama.V0_10_0_1
 	m["0.10.1.0"] = sarama.V0_10_1_0
+	m["0.10.2.0"] = sarama.V0_10_2_0
+	m["0.11.0.0"] = sarama.V0_11_0_0
+	m["0.11.0.1"] = sarama.V0_11_0_1
+	m["0.11.0.2"] = sarama.V0_11_0_2
+	m["1.0.0.0"] = sarama.V1_0_0_0
+	m["1.1.0.0"] = sarama.V1_1_0_0
 	return m
 }
 

@@ -5,15 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b6cc490e-9494-4bfd-9516-2f9ce0008f55" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/kafka/kafka.go" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/kafka/monitor/monitor.go" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/conf/kafka.conf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/rabbitmq/rabbitmq.go" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/kafka/monitor/monitor.go" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/elastic_20180328.log" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/redis_20180328.log" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/zookeeper_20180328.log" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/conf/redis.conf" afterPath="$PROJECT_DIR$/conf/redis.conf" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/conf/zookeeper.conf" afterPath="$PROJECT_DIR$/conf/zookeeper.conf" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/elasticsearch/elasticsearch.go" afterPath="$PROJECT_DIR$/elasticsearch/elasticsearch.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mysql/mysql.go" afterPath="$PROJECT_DIR$/mysql/mysql.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/redis/redis.go" afterPath="$PROJECT_DIR$/redis/redis.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/zookeeper/zookeeper.go" afterPath="$PROJECT_DIR$/zookeeper/zookeeper.go" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/kafka/kafka.go" afterPath="$PROJECT_DIR$/kafka/kafka.go" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -23,7 +22,54 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf />
+    <splitter split-orientation="horizontal" split-proportion="0.2084673">
+      <split-first>
+        <leaf>
+          <file leaf-file-name="kafka.go" pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/kafka/kafka.go">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="351">
+                  <caret line="49" column="19" lean-forward="true" selection-start-line="49" selection-start-column="19" selection-end-line="49" selection-end-column="19" />
+                  <folding>
+                    <element signature="e#14#491#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="mysql.go" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/mysql/mysql.go">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="162">
+                  <caret line="61" column="19" lean-forward="true" selection-start-line="61" selection-start-column="19" selection-end-line="61" selection-end-column="19" />
+                  <folding>
+                    <element signature="e#14#593#0" expanded="true" />
+                    <marker date="1522746731859" expanded="true" signature="38226:38295" ph="SELECT user,... PROCESSLIST" />
+                    <marker date="1522746731859" expanded="true" signature="38955:39380" ph="select user,... USER_STATISTICS" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+        </leaf>
+      </split-first>
+      <split-second>
+        <leaf>
+          <file leaf-file-name="rabbitmq.go" pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/rabbitmq/rabbitmq.go">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="165">
+                  <caret line="68" column="14" lean-forward="false" selection-start-line="68" selection-start-column="14" selection-end-line="68" selection-end-column="14" />
+                  <folding>
+                    <element signature="e#14#489#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+        </leaf>
+      </split-second>
+    </splitter>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -34,9 +80,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>commands_commit</find>
-      <find>innodb_row_lock_current_waits</find>
-      <find>select</find>
       <find>event_name=wait/synch/rwlock/innodb/trx_purge_latch</find>
       <find>blogic</find>
       <find>connections</find>
@@ -49,7 +92,6 @@
       <find>uint8</find>
       <find>inter</find>
       <find>uint</find>
-      <find>internal</find>
       <find>inputs</find>
       <find>jsonparser</find>
       <find>EventsStatements</find>
@@ -64,6 +106,10 @@
       <find>LastGatherStagesEndTime</find>
       <find>measurement</find>
       <find>sample</find>
+      <find>sarama</find>
+      <find>version</find>
+      <find>internal</find>
+      <find>GetTLSConfig</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -122,8 +168,12 @@
         <option value="$PROJECT_DIR$/zookeeper/zookeeper.go" />
         <option value="$PROJECT_DIR$/kafka/monitor/monitor.go" />
         <option value="$PROJECT_DIR$/kafka/main.go" />
-        <option value="$PROJECT_DIR$/kafka/kafka.go" />
         <option value="$PROJECT_DIR$/mysql/mysql.go" />
+        <option value="$PROJECT_DIR$/log/kafka_20180412.log" />
+        <option value="$PROJECT_DIR$/../../Shopify/sarama/utils.go" />
+        <option value="$PROJECT_DIR$/conf/kafka.conf" />
+        <option value="$PROJECT_DIR$/kafka/kafka.go" />
+        <option value="$PROJECT_DIR$/rabbitmq/rabbitmq.go" />
       </list>
     </option>
   </component>
@@ -134,7 +184,8 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-6" />
+    <option name="x" value="984" />
+    <option name="y" value="72" />
     <option name="width" value="976" />
     <option name="height" value="994" />
   </component>
@@ -153,10 +204,9 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
-      <pane id="AndroidView" />
-      <pane id="PackagesPane" />
       <pane id="Scratches" />
+      <pane id="Scope" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -172,30 +222,42 @@
             <path>
               <item name="blogkit-plugins" type="b2602c69:ProjectViewProjectNode" />
               <item name="blogkit-plugins" type="462c0819:PsiDirectoryNode" />
-              <item name="kafka" type="462c0819:PsiDirectoryNode" />
-              <item name="monitor" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="blogkit-plugins" type="b2602c69:ProjectViewProjectNode" />
-              <item name="blogkit-plugins" type="462c0819:PsiDirectoryNode" />
               <item name="mysql" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="blogkit-plugins" type="b2602c69:ProjectViewProjectNode" />
-              <item name="blogkit-plugins" type="462c0819:PsiDirectoryNode" />
-              <item name="redis" type="462c0819:PsiDirectoryNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+            </path>
+            <path>
+              <item name="blogkit-plugins" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="GOPATH &lt;blogkit-plugins&gt;" type="20ee2d1f:SyntheticLibraryElementNode" />
+            </path>
+            <path>
+              <item name="blogkit-plugins" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="GOPATH &lt;blogkit-plugins&gt;" type="20ee2d1f:SyntheticLibraryElementNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="blogkit-plugins" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="GOPATH &lt;blogkit-plugins&gt;" type="20ee2d1f:SyntheticLibraryElementNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="github.com" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="AndroidView" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="nodejs_interpreter_path" value="C:/MyPrograms/Work/nodejs/node" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../top.bhappy" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../influxdata/telegraf" />
     <property name="go.sdk.automatically.set" value="true" />
     <property name="DefaultGoTemplateProperty" value="Go File" />
     <property name="SearchEverywhereHistoryKey" value="true&#9;null&#9;null" />
@@ -227,7 +289,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Go Application.zookeeper.go">
+  <component name="RunManager" selected="Go Application.kafka.go">
     <configuration default="true" type="Applet" factoryName="Applet">
       <option name="WIDTH" value="400" />
       <option name="HEIGHT" value="300" />
@@ -334,6 +396,15 @@
       <package value="github.com/hongdanyang1991/blogkit-plugins" />
       <directory value="$PROJECT_DIR$" />
     </configuration>
+    <configuration name="kafka.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true">
+      <module name="blogkit-plugins" />
+      <working_directory value="$PROJECT_DIR$" />
+      <go_parameters value="-i" />
+      <kind value="FILE" />
+      <filePath value="$PROJECT_DIR$/kafka/kafka.go" />
+      <package value="github.com/hongdanyang1991/blogkit-plugins" />
+      <directory value="$PROJECT_DIR$" />
+    </configuration>
     <configuration name="mysql.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true">
       <module name="blogkit-plugins" />
       <working_directory value="$PROJECT_DIR$" />
@@ -352,15 +423,6 @@
       <package value="github.com/hongdanyang1991/blogkit-plugins" />
       <directory value="$PROJECT_DIR$" />
     </configuration>
-    <configuration name="tomcat.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true">
-      <module name="blogkit-plugins" />
-      <working_directory value="$PROJECT_DIR$" />
-      <go_parameters value="-i" />
-      <kind value="FILE" />
-      <filePath value="$PROJECT_DIR$/tomcat/tomcat.go" />
-      <package value="github.com/hongdanyang1991/blogkit-plugins" />
-      <directory value="$PROJECT_DIR$" />
-    </configuration>
     <configuration name="zookeeper.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true">
       <module name="blogkit-plugins" />
       <working_directory value="$PROJECT_DIR$" />
@@ -372,18 +434,18 @@
     </configuration>
     <list size="5">
       <item index="0" class="java.lang.String" itemvalue="Go Application.mysql.go" />
-      <item index="1" class="java.lang.String" itemvalue="Go Application.tomcat.go" />
-      <item index="2" class="java.lang.String" itemvalue="Go Application.elasticsearch.go" />
-      <item index="3" class="java.lang.String" itemvalue="Go Application.redis.go" />
-      <item index="4" class="java.lang.String" itemvalue="Go Application.zookeeper.go" />
+      <item index="1" class="java.lang.String" itemvalue="Go Application.elasticsearch.go" />
+      <item index="2" class="java.lang.String" itemvalue="Go Application.redis.go" />
+      <item index="3" class="java.lang.String" itemvalue="Go Application.zookeeper.go" />
+      <item index="4" class="java.lang.String" itemvalue="Go Application.kafka.go" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Go Application.zookeeper.go" />
-        <item index="1" class="java.lang.String" itemvalue="Go Application.redis.go" />
-        <item index="2" class="java.lang.String" itemvalue="Go Application.elasticsearch.go" />
-        <item index="3" class="java.lang.String" itemvalue="Go Application.mysql.go" />
-        <item index="4" class="java.lang.String" itemvalue="Go Application.tomcat.go" />
+        <item index="0" class="java.lang.String" itemvalue="Go Application.kafka.go" />
+        <item index="1" class="java.lang.String" itemvalue="Go Application.zookeeper.go" />
+        <item index="2" class="java.lang.String" itemvalue="Go Application.redis.go" />
+        <item index="3" class="java.lang.String" itemvalue="Go Application.elasticsearch.go" />
+        <item index="4" class="java.lang.String" itemvalue="Go Application.mysql.go" />
       </list>
     </recent_temporary>
   </component>
@@ -442,7 +504,20 @@
       <workItem from="1522639224340" duration="4939000" />
       <workItem from="1522717904230" duration="3154000" />
       <workItem from="1522806252163" duration="2835000" />
-      <workItem from="1522828261138" duration="22000" />
+      <workItem from="1522828261138" duration="282000" />
+      <workItem from="1522828564684" duration="174000" />
+      <workItem from="1523431639669" duration="3415000" />
+      <workItem from="1523499718650" duration="15486000" />
+      <workItem from="1523582795951" duration="7983000" />
+      <workItem from="1523841529966" duration="5131000" />
+      <workItem from="1523927869681" duration="894000" />
+      <workItem from="1523931784094" duration="206000" />
+      <workItem from="1523937272199" duration="6009000" />
+      <workItem from="1524013880151" duration="6482000" />
+      <workItem from="1524099928164" duration="6525000" />
+      <workItem from="1524186320568" duration="2062000" />
+      <workItem from="1524206395890" duration="161000" />
+      <workItem from="1524208355244" duration="4757000" />
     </task>
     <servers />
   </component>
@@ -479,38 +554,39 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="292382000" />
+    <option name="totallyTimeSpent" value="351927000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1050" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32942554" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2708089" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24267292" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32942554" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3481829" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1641266" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.11789925" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22132905" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24973205" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.23681125" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31770223" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Documentation" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="FLOATING" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" x="91" y="91" width="1738" height="850" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32942554" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -521,55 +597,11 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="39" />
+      <option name="time" value="74" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/../../qiniu/log/logext.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="513">
-          <caret line="70" column="23" lean-forward="false" selection-start-line="70" selection-start-column="14" selection-end-line="70" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mysql/log_0306.log" />
-    <entry file="file://$PROJECT_DIR$/mysql/mysql_test.go" />
-    <entry file="file://C:/MyPrograms/Work/Go/src/os/file.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1593">
-          <caret line="64" column="13" lean-forward="false" selection-start-line="64" selection-start-column="4" selection-end-line="64" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/log_0308.log" />
-    <entry file="file://$PROJECT_DIR$/log_0309.log" />
-    <entry file="file://$PROJECT_DIR$/tomcat/tomcat_test.go" />
-    <entry file="file://$PROJECT_DIR$/log_tomcat0312.log" />
-    <entry file="file://$PROJECT_DIR$/../../influxdata/telegraf/plugins/parsers/json/parser.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="347">
-          <caret line="111" column="6" lean-forward="true" selection-start-line="111" selection-start-column="6" selection-end-line="111" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/common/telegraf/plugins/parsers/json/parser_test.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/common/telegraf/plugins/parsers/json/parser.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="297">
-          <caret line="11" column="63" lean-forward="false" selection-start-line="11" selection-start-column="63" selection-end-line="11" selection-end-column="63" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../../qiniu/logkit/vendor/github.com/json-iterator/go/feature_any_bool.go" />
-    <entry file="file://$PROJECT_DIR$/log_elastic0313.log" />
-    <entry file="file://$PROJECT_DIR$/log_mysql0316.log" />
     <entry file="file://$PROJECT_DIR$/log_mysql0319.log" />
     <entry file="file://C:/MyPrograms/Work/Go/src/time/time.go">
       <provider selected="true" editor-type-id="text-editor">
@@ -729,31 +761,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/elasticsearch/elasticsearch.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="324">
-          <caret line="30" column="56" lean-forward="false" selection-start-line="30" selection-start-column="56" selection-end-line="30" selection-end-column="56" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/conf/elasticsearch.conf">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="108">
-          <caret line="4" column="1" lean-forward="false" selection-start-line="4" selection-start-column="1" selection-end-line="4" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/zookeeper/zookeeper.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="12" lean-forward="true" selection-start-line="0" selection-start-column="12" selection-end-line="0" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/kafka/monitor/monitor.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="15" lean-forward="false" selection-start-line="0" selection-start-column="15" selection-end-line="0" selection-end-column="15" />
         </state>
       </provider>
     </entry>
@@ -778,13 +789,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/kafka/kafka.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="459">
-          <caret line="44" column="19" lean-forward="false" selection-start-line="44" selection-start-column="19" selection-end-line="44" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/redis/redis.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2673">
@@ -792,14 +796,139 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/mysql/mysql.go">
+    <entry file="file://$PROJECT_DIR$/kafka/monitor/monitor.go" />
+    <entry file="file://$PROJECT_DIR$/conf/elasticsearch.conf">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="108">
+          <caret line="4" column="1" lean-forward="false" selection-start-line="4" selection-start-column="1" selection-end-line="4" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/MyPrograms/Work/Go/src/sort/sort.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="250">
+          <caret line="333" column="21" lean-forward="false" selection-start-line="333" selection-start-column="21" selection-end-line="333" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/log/kafka_20180412.log" />
+    <entry file="file://$PROJECT_DIR$/../../Shopify/sarama/metadata_response.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="171">
+          <caret line="116" column="7" lean-forward="false" selection-start-line="116" selection-start-column="7" selection-end-line="116" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../Shopify/sarama/examples/http_server/http_server_test.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2349">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../Shopify/sarama/examples/http_server/http_server.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="163">
+          <caret line="138" column="5" lean-forward="false" selection-start-line="138" selection-start-column="4" selection-end-line="138" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../Shopify/sarama/metrics.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="353">
+          <caret line="51" column="0" lean-forward="true" selection-start-line="51" selection-start-column="0" selection-end-line="51" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../Shopify/sarama/list_groups_request.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="54">
+          <caret line="2" column="29" lean-forward="false" selection-start-line="2" selection-start-column="23" selection-end-line="2" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/MyPrograms/Work/Go/src/sync/mutex.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="743">
+          <caret line="174" column="0" lean-forward="false" selection-start-line="174" selection-start-column="0" selection-end-line="174" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../Shopify/sarama/broker.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="743">
+          <caret line="339" column="19" lean-forward="false" selection-start-line="339" selection-start-column="19" selection-end-line="339" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../Shopify/sarama/config.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="143">
+          <caret line="268" column="16" lean-forward="true" selection-start-line="268" selection-start-column="16" selection-end-line="268" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/kafka/kafka.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="27">
-          <caret line="1508" column="51" lean-forward="false" selection-start-line="1508" selection-start-column="51" selection-end-line="1508" selection-end-column="51" />
+          <caret line="1" column="0" lean-forward="false" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+          <folding>
+            <element signature="e#14#491#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../Shopify/sarama/utils.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="319">
+          <caret line="156" column="43" lean-forward="false" selection-start-line="156" selection-start-column="4" selection-end-line="156" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/conf/kafka.conf">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="7" column="1" lean-forward="false" selection-start-line="7" selection-start-column="1" selection-end-line="7" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/elasticsearch/elasticsearch.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="324">
+          <caret line="30" column="56" lean-forward="false" selection-start-line="30" selection-start-column="56" selection-end-line="30" selection-end-column="56" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mysql/mysql.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="162">
+          <caret line="61" column="19" lean-forward="true" selection-start-line="61" selection-start-column="19" selection-end-line="61" selection-end-column="19" />
           <folding>
             <element signature="e#14#593#0" expanded="true" />
             <marker date="1522746731859" expanded="true" signature="38226:38295" ph="SELECT user,... PROCESSLIST" />
             <marker date="1522746731859" expanded="true" signature="38955:39380" ph="select user,... USER_STATISTICS" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/kafka/kafka.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="351">
+          <caret line="49" column="19" lean-forward="true" selection-start-line="49" selection-start-column="19" selection-end-line="49" selection-end-column="19" />
+          <folding>
+            <element signature="e#14#491#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rabbitmq/rabbitmq.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="68" column="14" lean-forward="false" selection-start-line="68" selection-start-column="14" selection-end-line="68" selection-end-column="14" />
+          <folding>
+            <element signature="e#14#489#0" expanded="true" />
           </folding>
         </state>
       </provider>
