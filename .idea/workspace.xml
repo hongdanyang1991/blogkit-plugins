@@ -5,28 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b6cc490e-9494-4bfd-9516-2f9ce0008f55" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/conf/rabbitmq.conf" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/log/kafka_20180423.log" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/log/kafka_20180424.log" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/log/mysql_20180423.log" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/log/mysql_20180424.log" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mysql/mysql.go.bak" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mysql/v1/mysql.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/common/telegraf/plugins/parsers/json/parser_test.go" afterPath="$PROJECT_DIR$/common/telegraf/plugins/parsers/json/parser_test.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/common/utils/log_util.go" afterPath="$PROJECT_DIR$/common/utils/log_util.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/common/utils/util.go" afterPath="$PROJECT_DIR$/common/utils/util.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/conf/elasticsearch.conf" afterPath="$PROJECT_DIR$/conf/elasticsearch.conf" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/conf/kafka.conf" afterPath="$PROJECT_DIR$/conf/kafka.conf" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/conf/mysql.conf" afterPath="$PROJECT_DIR$/conf/mysql.conf" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/conf/zookeeper.conf" afterPath="$PROJECT_DIR$/conf/zookeeper.conf" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/elasticsearch/elasticsearch.go" afterPath="$PROJECT_DIR$/elasticsearch/elasticsearch.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/kafka/kafka.go" afterPath="$PROJECT_DIR$/kafka/kafka.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mysql/mysql.go" afterPath="$PROJECT_DIR$/mysql/mysql.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/rabbitmq/rabbitmq.go" afterPath="$PROJECT_DIR$/rabbitmq/rabbitmq.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/redis/redis.go" afterPath="$PROJECT_DIR$/redis/redis.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tomcat/tomcat.go" afterPath="$PROJECT_DIR$/tomcat/tomcat.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/zookeeper/zookeeper.go" afterPath="$PROJECT_DIR$/zookeeper/zookeeper.go" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/kafka_20180423.log" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/kafka_20180424.log" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/mysql_20180423.log" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/mysql_20180424.log" afterPath="" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -62,8 +44,8 @@
       <file leaf-file-name="zookeeper.conf" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/conf/zookeeper.conf">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="2" selection-end-column="1" />
+            <state relative-caret-position="54">
+              <caret line="2" column="1" lean-forward="true" selection-start-line="2" selection-start-column="1" selection-end-line="2" selection-end-column="1" />
               <folding />
             </state>
           </provider>
@@ -556,7 +538,7 @@
       <workItem from="1524446203249" duration="20276000" />
       <workItem from="1524532484730" duration="8376000" />
       <workItem from="1524542518292" duration="63000" />
-      <workItem from="1524542625023" duration="17000" />
+      <workItem from="1524542625023" duration="43000" />
     </task>
     <servers />
   </component>
@@ -593,7 +575,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="382687000" />
+    <option name="totallyTimeSpent" value="382713000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1050" extended-state="6" />
@@ -963,8 +945,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/conf/zookeeper.conf">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="2" selection-end-column="1" />
+        <state relative-caret-position="54">
+          <caret line="2" column="1" lean-forward="true" selection-start-line="2" selection-start-column="1" selection-end-line="2" selection-end-column="1" />
           <folding />
         </state>
       </provider>
