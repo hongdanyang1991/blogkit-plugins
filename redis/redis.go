@@ -2,35 +2,35 @@ package main
 
 import (
 	"bufio"
-	"errors"
+	"encoding/json"
+	"flag"
 	"fmt"
-	"net"
 	"net/url"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
-	"encoding/json"
 
-	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf"
-	"flag"
-	"github.com/qiniu/log"
+	"github.com/go-redis/redis"
 	"github.com/hongdanyang1991/blogkit-plugins/common/conf"
-	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/models"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf"
 	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/agent"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/models"
 	"github.com/hongdanyang1991/blogkit-plugins/common/utils"
+	"github.com/qiniu/log"
+	"io"
 )
 
 var redisConf = flag.String("f", "conf/redis.conf", "configuration file to load")
 var logPath = flag.String("l", "log/redis", "configuration file to log")
-var redis = &Redis{}
+var r = &Redis{}
 
 const defaultPort = "6379"
 
 func init() {
 	flag.Parse()
 	utils.RouteLog(*logPath)
-	if err := conf.LoadEx(redis, *redisConf); err != nil {
+	if err := conf.LoadEx(r, *redisConf); err != nil {
 		log.Fatal("config.Load failed:", err)
 	}
 }
@@ -38,9 +38,9 @@ func init() {
 func main() {
 	log.Info("start collect redis metric data")
 	metrics := []telegraf.Metric{}
-	input := models.NewRunningInput(redis, &models.InputConfig{})
+	input := models.NewRunningInput(r, &models.InputConfig{})
 	acc := agent.NewAccumulator(input, metrics)
-	redis.Gather(acc)
+	r.Gather(acc)
 	datas := []map[string]interface{}{}
 
 	for _, metric := range acc.Metrics {
@@ -56,7 +56,32 @@ func main() {
 }
 
 type Redis struct {
-	Servers []string `json:"servers"`
+	Servers []string
+
+	clients     []Client
+	initialized bool
+}
+
+type Client interface {
+	Info() *redis.StringCmd
+	BaseTags() map[string]string
+}
+
+type RedisClient struct {
+	client *redis.Client
+	tags   map[string]string
+}
+
+func (r *RedisClient) Info() *redis.StringCmd {
+	return r.client.Info()
+}
+
+func (r *RedisClient) BaseTags() map[string]string {
+	tags := make(map[string]string)
+	for k, v := range r.tags {
+		tags[k] = v
+	}
+	return tags
 }
 
 var sampleConfig = `
@@ -72,8 +97,6 @@ var sampleConfig = `
   servers = ["tcp://localhost:6379"]
 `
 
-var defaultTimeout = 5 * time.Second
-
 func (r *Redis) SampleConfig() string {
 	return sampleConfig
 }
@@ -88,111 +111,107 @@ var Tracking = map[string]string{
 	"role":              "replication_role",
 }
 
-var ErrProtocolError = errors.New("redis protocol error")
-
-
-
-// Reads stats from all configured servers accumulates stats.
-// Returns one of the errors encountered while gather stats (if any).
-func (r *Redis) Gather(acc telegraf.Accumulator) error {
-	if len(r.Servers) == 0 {
-		url := &url.URL{
-			Scheme: "tcp",
-			Host:   defaultPort,
-		}
-		r.gatherServer(url, acc)
+func (r *Redis) init(acc telegraf.Accumulator) error {
+	if r.initialized {
 		return nil
 	}
 
-	var wg sync.WaitGroup
-	for _, serv := range r.Servers {
+	if len(r.Servers) == 0 {
+		r.Servers = []string{"tcp://localhost:6379"}
+	}
+
+	r.clients = make([]Client, len(r.Servers))
+
+	for i, serv := range r.Servers {
 		if !strings.HasPrefix(serv, "tcp://") && !strings.HasPrefix(serv, "unix://") {
+			log.Printf("W! [inputs.redis]: server URL found without scheme; please update your configuration file")
 			serv = "tcp://" + serv
 		}
 
 		u, err := url.Parse(serv)
 		if err != nil {
-			acc.AddError(fmt.Errorf("Unable to parse to address '%s': %s", serv, err))
-			continue
-		} else if u.Scheme == "" {
-			// fallback to simple string based address (i.e. "10.0.0.1:10000")
-			u.Scheme = "tcp"
-			u.Host = serv
-			u.Path = ""
+			return fmt.Errorf("Unable to parse to address %q: %v", serv, err)
 		}
-		if u.Scheme == "tcp" {
-			_, _, err := net.SplitHostPort(u.Host)
-			if err != nil {
-				u.Host = u.Host + ":" + defaultPort
+
+		password := ""
+		if u.User != nil {
+			pw, ok := u.User.Password()
+			if ok {
+				password = pw
 			}
 		}
 
+		var address string
+		if u.Scheme == "unix" {
+			address = u.Path
+		} else {
+			address = u.Host
+		}
+
+		client := redis.NewClient(
+			&redis.Options{
+				Addr:     address,
+				Password: password,
+				Network:  u.Scheme,
+				PoolSize: 1,
+			},
+		)
+
+		tags := map[string]string{}
+		if u.Scheme == "unix" {
+			tags["socket"] = u.Path
+		} else {
+			tags["server"] = u.Hostname()
+			tags["port"] = u.Port()
+		}
+
+		r.clients[i] = &RedisClient{
+			client: client,
+			tags:   tags,
+		}
+	}
+
+	r.initialized = true
+	return nil
+}
+
+// Reads stats from all configured servers accumulates stats.
+// Returns one of the errors encountered while gather stats (if any).
+func (r *Redis) Gather(acc telegraf.Accumulator) error {
+	if !r.initialized {
+		err := r.init(acc)
+		if err != nil {
+			return err
+		}
+	}
+
+	var wg sync.WaitGroup
+
+	for _, client := range r.clients {
 		wg.Add(1)
-		go func(serv string) {
+		go func(client Client) {
 			defer wg.Done()
-			acc.AddError(r.gatherServer(u, acc))
-		}(serv)
+			acc.AddError(r.gatherServer(client, acc))
+		}(client)
 	}
 
 	wg.Wait()
 	return nil
 }
 
-func (r *Redis) gatherServer(addr *url.URL, acc telegraf.Accumulator) error {
-	var address string
-
-	if addr.Scheme == "unix" {
-		address = addr.Path
-	} else {
-		address = addr.Host
-	}
-	c, err := net.DialTimeout(addr.Scheme, address, defaultTimeout)
+func (r *Redis) gatherServer(client Client, acc telegraf.Accumulator) error {
+	info, err := client.Info().Result()
 	if err != nil {
-		return fmt.Errorf("Unable to connect to redis server '%s': %s", address, err)
-	}
-	defer c.Close()
-
-	// Extend connection
-	c.SetDeadline(time.Now().Add(defaultTimeout))
-
-	if addr.User != nil {
-		pwd, set := addr.User.Password()
-		if set && pwd != "" {
-			c.Write([]byte(fmt.Sprintf("AUTH %s\r\n", pwd)))
-
-			rdr := bufio.NewReader(c)
-
-			line, err := rdr.ReadString('\n')
-			if err != nil {
-				return err
-			}
-			if line[0] != '+' {
-				return fmt.Errorf("%s", strings.TrimSpace(line)[1:])
-			}
-		}
+		return err
 	}
 
-	c.Write([]byte("INFO\r\n"))
-	c.Write([]byte("EOF\r\n"))
-	rdr := bufio.NewReader(c)
-
-	var tags map[string]string
-
-	if addr.Scheme == "unix" {
-		tags = map[string]string{"socket": addr.Path}
-	} else {
-		// Setup tags for all redis metrics
-		host, port := "unknown", "unknown"
-		// If there's an error, ignore and use 'unknown' tags
-		host, port, _ = net.SplitHostPort(addr.Host)
-		tags = map[string]string{"server": host, "port": port}
-	}
-	return gatherInfoOutput(rdr, acc, tags)
+	rdr := strings.NewReader(info)
+	return gatherInfoOutput(rdr, acc, client.BaseTags())
 }
 
 // gatherInfoOutput gathers
 func gatherInfoOutput(
-	rdr *bufio.Reader,
+	rdr io.Reader,
 	acc telegraf.Accumulator,
 	tags map[string]string,
 ) error {
@@ -203,13 +222,11 @@ func gatherInfoOutput(
 	fields := make(map[string]interface{})
 	for scanner.Scan() {
 		line := scanner.Text()
-		if strings.Contains(line, "ERR") {
-			break
-		}
 
 		if len(line) == 0 {
 			continue
 		}
+
 		if line[0] == '#' {
 			if len(line) > 2 {
 				section = line[2:]
@@ -227,6 +244,10 @@ func gatherInfoOutput(
 			if name != "lru_clock" && name != "uptime_in_seconds" && name != "redis_version" {
 				continue
 			}
+		}
+
+		if strings.HasPrefix(name, "master_replid") {
+			continue
 		}
 
 		if name == "mem_allocator" {
@@ -316,4 +337,3 @@ func gatherKeyspaceLine(
 		acc.AddFields("redis_keyspace", fields, tags)
 	}
 }
-

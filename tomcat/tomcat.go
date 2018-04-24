@@ -1,18 +1,18 @@
 package main
 
 import (
+	"encoding/json"
 	"encoding/xml"
+	"flag"
 	"fmt"
+	"github.com/qiniu/log"
 	"net/http"
 	"net/url"
 	"strconv"
-	"flag"
-	"encoding/json"
-	"github.com/qiniu/log"
 
-	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf"
 	"github.com/hongdanyang1991/blogkit-plugins/common"
 	"github.com/hongdanyang1991/blogkit-plugins/common/conf"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf"
 	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/agent"
 	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/models"
 	"github.com/hongdanyang1991/blogkit-plugins/common/utils"
@@ -97,9 +97,9 @@ type RequestInfo struct {
 }
 
 type Tomcat struct {
-	URL      string	`json:"url"`
-	Username string	`json:"user_name"`
-	Password string	`json:"password"`
+	URL      string `json:"url"`
+	Username string `json:"user_name"`
+	Password string `json:"password"`
 	Timeout  common.Duration
 
 	SSLCA              string `json:"ssl_ca"`

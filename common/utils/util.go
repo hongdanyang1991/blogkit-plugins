@@ -1,8 +1,10 @@
 package utils
 
 import (
-	"path/filepath"
 	"fmt"
+	"path/filepath"
+	"strings"
+	"unicode"
 )
 
 const (
@@ -19,4 +21,13 @@ func GetDirAndFile(path string) (dir, file string, err error) {
 	}
 	file = filepath.Base(path)
 	return
+}
+
+func SplitSlice(keyStr string) []string {
+	keys := strings.FieldsFunc(keyStr, isSeparator)
+	return keys
+}
+
+func isSeparator(separator rune) bool {
+	return separator == ',' || unicode.IsSpace(separator)
 }

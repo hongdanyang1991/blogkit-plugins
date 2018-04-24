@@ -2,22 +2,22 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
-	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf"
 	"github.com/hongdanyang1991/blogkit-plugins/common"
+	"github.com/hongdanyang1991/blogkit-plugins/common/conf"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/agent"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/models"
 	jsonparser "github.com/hongdanyang1991/blogkit-plugins/common/telegraf/plugins/parsers/json"
+	"github.com/hongdanyang1991/blogkit-plugins/common/utils"
+	"github.com/qiniu/log"
 	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strings"
 	"sync"
 	"time"
-	"flag"
-	"github.com/qiniu/log"
-	"github.com/hongdanyang1991/blogkit-plugins/common/conf"
-	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/models"
-	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/agent"
-	"github.com/hongdanyang1991/blogkit-plugins/common/utils"
 )
 
 var elasticConf = flag.String("f", "conf/elasticsearch.conf", "configuration file to load")
@@ -54,8 +54,6 @@ func main() {
 	fmt.Println(string(data))
 
 }
-
-
 
 // mask for masking username/password from error messages
 var mask = regexp.MustCompile(`https?:\/\/\S+:\S+@`)
@@ -147,7 +145,7 @@ const sampleConfig = `
 
   ## node_stats is a list of sub-stats that you want to have gathered. Valid options
   ## are "indices", "os", "process", "jvm", "thread_pool", "fs", "transport", "http",
-  ## "breakers". Per default, all stats are gathered.
+  ## "breaker". Per default, all stats are gathered.
   # node_stats = ["jvm", "http"]
 
   ## Optional SSL Config
@@ -161,17 +159,17 @@ const sampleConfig = `
 // Elasticsearch is a plugin to read stats from one or many Elasticsearch
 // servers.
 type Elasticsearch struct {
-	Local                   bool				`json:"local"`
-	Servers                 []string			`json:"servers"`
-	HttpTimeout             common.Duration		`json:"http_timeout"`
-	ClusterHealth           bool				`json:"cluster_health"`
-	ClusterHealthLevel      string				`json:"cluster_health_level"`
-	ClusterStats            bool				`json:"cluster_status"`
-	NodeStats               []string			`json:"node_status"`
-	SSLCA                   string 				`json:"ssl_ca"`   // Path to CA file
-	SSLCert                 string 				`json:"ssl_cert"` // Path to host cert file
-	SSLKey                  string 				`json:"ssl_key"`  // Path to cert key file
-	InsecureSkipVerify      bool   				`json:"insecure_skip_verify"`// Use SSL but skip chain & host verification
+	Local                   bool
+	Servers                 []string
+	HttpTimeout             common.Duration
+	ClusterHealth           bool
+	ClusterHealthLevel      string
+	ClusterStats            bool
+	NodeStats               []string
+	SSLCA                   string `json:"ssl_ca"`   // Path to CA file
+	SSLCert                 string `json:"ssl_cert"` // Path to host cert file
+	SSLKey                  string `json:"ssl_key"`  // Path to cert key file
+	InsecureSkipVerify      bool   // Use SSL but skip chain & host verification
 	client                  *http.Client
 	catMasterResponseTokens []string
 	isMaster                bool
@@ -183,6 +181,19 @@ func NewElasticsearch() *Elasticsearch {
 		HttpTimeout:        common.Duration{Duration: time.Second * 5},
 		ClusterHealthLevel: "indices",
 	}
+}
+
+// perform status mapping
+func mapHealthStatusToCode(s string) int {
+	switch strings.ToLower(s) {
+	case "green":
+		return 1
+	case "yellow":
+		return 2
+	case "red":
+		return 3
+	}
+	return 0
 }
 
 // SampleConfig returns sample configuration for this plugin.
@@ -353,6 +364,7 @@ func (e *Elasticsearch) gatherClusterHealth(url string, acc telegraf.Accumulator
 	measurementTime := time.Now()
 	clusterFields := map[string]interface{}{
 		"status":                healthStats.Status,
+		"status_code":           mapHealthStatusToCode(healthStats.Status),
 		"timed_out":             healthStats.TimedOut,
 		"number_of_nodes":       healthStats.NumberOfNodes,
 		"number_of_data_nodes":  healthStats.NumberOfDataNodes,
@@ -372,6 +384,7 @@ func (e *Elasticsearch) gatherClusterHealth(url string, acc telegraf.Accumulator
 	for name, health := range healthStats.Indices {
 		indexFields := map[string]interface{}{
 			"status":                health.Status,
+			"status_code":           mapHealthStatusToCode(health.Status),
 			"number_of_shards":      health.NumberOfShards,
 			"number_of_replicas":    health.NumberOfReplicas,
 			"active_primary_shards": health.ActivePrimaryShards,
@@ -463,4 +476,3 @@ func (e *Elasticsearch) gatherJsonData(url string, v interface{}) error {
 
 	return nil
 }
-

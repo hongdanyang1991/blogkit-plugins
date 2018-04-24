@@ -1,21 +1,20 @@
 package main
 
 import (
-	"flag"
-	"github.com/hongdanyang1991/blogkit-plugins/common/utils"
-	"github.com/hongdanyang1991/blogkit-plugins/common/conf"
-	"github.com/qiniu/log"
-	"github.com/Shopify/sarama"
-	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf"
-	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/models"
-	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/agent"
-	"strings"
-	"sort"
-	"time"
-	"fmt"
 	"encoding/json"
-	"sync"
+	"flag"
+	"fmt"
+	"github.com/Shopify/sarama"
+	"github.com/hongdanyang1991/blogkit-plugins/common/conf"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/agent"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/models"
+	"github.com/hongdanyang1991/blogkit-plugins/common/utils"
+	"github.com/qiniu/log"
 	"github.com/ryanuber/go-glob"
+	"sort"
+	"sync"
+	"time"
 )
 
 var kafkaConf = flag.String("f", "conf/kafka.conf", "configuration file to load")
@@ -29,10 +28,6 @@ func init() {
 	if err := conf.LoadEx(kafka, *kafkaConf); err != nil {
 		log.Fatal("config.Load failed:", err)
 	}
-	kafka.brokers = strings.Split(kafka.Brokers, ",")
-	kafka.groups = strings.Split(kafka.Groups, ",")
-	kafka.topics = strings.Split(kafka.Topics, ",")
-
 }
 
 func main() {
@@ -55,20 +50,17 @@ func main() {
 }
 
 type Kafka struct {
-	ZkAddr		string `json:"zookeeper_address"`
-	BasePath	string `json:"base_path"`
-	Brokers		string `json:"brokers"`
-	Topics      string `json:"topics""`
-	Groups		string `json:"groups""`
-	Version     string `json:"version"`
-	client      sarama.Client
-	topics      []string
-	groups      []string
-	brokers     []string
+	//ZkAddr		string `json:"zookeeper_address"`
+	//BasePath	string `json:"base_path"`
+	Brokers []string `json:"brokers"`
+	Topics  []string `json:"topics""`
+	Groups  []string `json:"groups""`
+	Version string   `json:"version"`
+	client  sarama.Client
 }
 
 func (k *Kafka) Gather(acc telegraf.Accumulator) error {
-	brokers := k.brokers
+	brokers := k.Brokers
 	sort.Sort(sort.StringSlice(brokers))
 	kafkaVersions := KafkaVersion()
 	k.client = newSaramaClient(brokers, kafkaVersions[k.Version])
@@ -85,7 +77,7 @@ func (k *Kafka) gatherBrokerOffsets(acc telegraf.Accumulator) {
 	requests := make(map[int32]map[int64]*sarama.OffsetRequest)
 	brokers := make(map[int32]*sarama.Broker)
 	for topic, partitions := range topicMap {
-		if !containsString(k.topics, topic) {
+		if !containsString(k.Topics, topic) {
 			continue
 		}
 
@@ -137,7 +129,7 @@ func (k *Kafka) gatherBrokerOffsets(acc telegraf.Accumulator) {
 					continue
 				}
 
-				offset := map[string]interface{} {
+				offset := map[string]interface{}{
 					"topic":               topic,
 					"partition":           partition,
 					"oldest":              position == sarama.OffsetOldest,
@@ -180,13 +172,12 @@ func (k *Kafka) gatherBrokerMetadata(acc telegraf.Accumulator) {
 
 	response, err := broker.GetMetadata(&sarama.MetadataRequest{})
 
-/*	for _, topic := range response.Topics {
-		fmt.Println(topic)
-	}
-	for _, broker := range response.Brokers {
-		fmt.Println(broker)
-	}*/
-
+	/*	for _, topic := range response.Topics {
+			fmt.Println(topic)
+		}
+		for _, broker := range response.Brokers {
+			fmt.Println(broker)
+		}*/
 
 	if err != nil {
 		log.Error(fmt.Sprintf("monitor: cannot get metadata: %v", err))
@@ -195,7 +186,7 @@ func (k *Kafka) gatherBrokerMetadata(acc telegraf.Accumulator) {
 
 	ts := time.Now().Unix() * 1000
 	for _, topic := range response.Topics {
-		if !containsString(k.topics, topic.Name) {
+		if !containsString(k.Topics, topic.Name) {
 			continue
 		}
 		if topic.Err != sarama.ErrNoError {
@@ -252,7 +243,7 @@ func (k *Kafka) gatherConsumerOffsets(acc telegraf.Accumulator) {
 		}
 
 		for group := range groups.Groups {
-			if !containsString(k.groups, group) {
+			if !containsString(k.Groups, group) {
 				continue
 			}
 
@@ -330,7 +321,6 @@ func (k *Kafka) gatherConsumerOffsets(acc telegraf.Accumulator) {
 	wg.Wait()
 }
 
-
 // getTopics gets the topics for the Kafka cluster.
 func (k *Kafka) getTopics() map[string]int {
 	// If auto create topics is on, trying to fetch metadata for a missing
@@ -361,7 +351,6 @@ func containsString(patterns []string, subject string) bool {
 	return false
 }
 
-
 // refreshMetadata refreshes the broker metadata
 func (k *Kafka) refreshMetadata(topics ...string) {
 	if err := k.client.RefreshMetadata(topics...); err != nil {
@@ -378,7 +367,6 @@ func (k *Kafka) Description() string {
 
 	return ""
 }
-
 
 func KafkaVersion() map[string]sarama.KafkaVersion {
 	m := make(map[string]sarama.KafkaVersion)

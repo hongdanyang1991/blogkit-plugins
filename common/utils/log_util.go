@@ -1,15 +1,15 @@
 package utils
 
 import (
-	"path/filepath"
-	"os"
 	"fmt"
-	"time"
 	"github.com/qiniu/log"
+	"os"
+	"path/filepath"
+	"time"
 )
 
 func RouteLog(logPath string) error {
-	dir, pattern, err :=  GetDirAndFile(logPath)
+	dir, pattern, err := GetDirAndFile(logPath)
 	if _, err = os.Stat(dir); os.IsNotExist(err) {
 		if err = os.MkdirAll(dir, DefaultDirPerm); err != nil {
 			err = fmt.Errorf("create  log dir error %v", err)
@@ -27,4 +27,3 @@ func RouteLog(logPath string) error {
 	log.SetOutputLevel(0)
 	return nil
 }
-

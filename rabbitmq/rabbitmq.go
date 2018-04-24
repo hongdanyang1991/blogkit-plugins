@@ -1,21 +1,22 @@
 package main
 
 import (
-	"sync"
-	"fmt"
 	"encoding/json"
+	"flag"
+	"fmt"
 	"net/http"
 	"strconv"
+	"sync"
 	"time"
-	"flag"
 
-	"github.com/qiniu/log"
-	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf"
 	"github.com/hongdanyang1991/blogkit-plugins/common"
-	"github.com/hongdanyang1991/blogkit-plugins/common/utils"
 	"github.com/hongdanyang1991/blogkit-plugins/common/conf"
-	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/models"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf"
 	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/agent"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/filter"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/models"
+	"github.com/hongdanyang1991/blogkit-plugins/common/utils"
+	"github.com/qiniu/log"
 )
 
 var rabbitmqConf = flag.String("f", "conf/rabbitmq.conf", "configuration file to load")
@@ -49,7 +50,6 @@ func main() {
 	fmt.Println(string(data))
 }
 
-
 // DefaultUsername will set a default value that corrasponds to the default
 // value used by Rabbitmq
 const DefaultUsername = "guest"
@@ -69,26 +69,34 @@ const DefaultClientTimeout = 4
 // RabbitMQ defines the configuration necessary for gathering metrics,
 // see the sample config for further details
 type RabbitMQ struct {
-	URL      string		`json:"url"`
-	Name     string		`json:"name"`
-	Username string		`json:"user_name"`
-	Password string		`json:"password"`
+	URL      string
+	Name     string
+	Username string
+	Password string
 	// Path to CA file
-	SSLCA string 		`json:"ssl_ca"`
+	SSLCA string `json:"ssl_ca"`
 	// Path to host cert file
-	SSLCert string 		`json:"ssl_cert"`
+	SSLCert string `json:"ssl_cert"`
 	// Path to cert key file
-	SSLKey string 		`json:"ssl_key"`
+	SSLKey string `json:"ssl_key"`
 	// Use SSL but skip chain & host verification
-	InsecureSkipVerify bool		`json:"insecure_skip_verify"`
+	InsecureSkipVerify bool
 
 	ResponseHeaderTimeout common.Duration `json:"header_timeout"`
 	ClientTimeout         common.Duration `json:"client_timeout"`
 
-	Nodes  []string
-	Queues []string
+	Nodes     []string
+	Queues    []string
+	Exchanges []string
+
+	QueueInclude []string `json:"queue_name_include"`
+	QueueExclude []string `json:"queue_name_exclude"`
 
 	Client *http.Client
+
+	filterCreated     bool
+	excludeEveryQueue bool
+	queueFilter       filter.Filter
 }
 
 // OverviewResponse ...
@@ -96,6 +104,12 @@ type OverviewResponse struct {
 	MessageStats *MessageStats `json:"message_stats"`
 	ObjectTotals *ObjectTotals `json:"object_totals"`
 	QueueTotals  *QueueTotals  `json:"queue_totals"`
+	Listeners    []Listeners   `json:"listeners"`
+}
+
+// Listeners ...
+type Listeners struct {
+	Protocol string `json:"protocol"`
 }
 
 // Details ...
@@ -109,12 +123,14 @@ type MessageStats struct {
 	AckDetails        Details `json:"ack_details"`
 	Deliver           int64
 	DeliverDetails    Details `json:"deliver_details"`
-	DeliverGet        int64
+	DeliverGet        int64   `json:"deliver_get"`
 	DeliverGetDetails Details `json:"deliver_get_details"`
 	Publish           int64
 	PublishDetails    Details `json:"publish_details"`
 	Redeliver         int64
 	RedeliverDetails  Details `json:"redeliver_details"`
+	PublishIn         int64   `json:"publish_in"`
+	PublishOut        int64   `json:"publish_out"`
 }
 
 // ObjectTotals ...
@@ -168,12 +184,23 @@ type Node struct {
 	RunQueue      int64 `json:"run_queue"`
 	SocketsTotal  int64 `json:"sockets_total"`
 	SocketsUsed   int64 `json:"sockets_used"`
+	Running       bool  `json:"running"`
+}
+
+type Exchange struct {
+	Name         string
+	MessageStats `json:"message_stats"`
+	Type         string
+	Internal     bool
+	Vhost        string
+	Durable      bool
+	AutoDelete   bool `json:"auto_delete"`
 }
 
 // gatherFunc ...
 type gatherFunc func(r *RabbitMQ, acc telegraf.Accumulator)
 
-var gatherFunctions = []gatherFunc{gatherOverview, gatherNodes, gatherQueues}
+var gatherFunctions = []gatherFunc{gatherOverview, gatherNodes, gatherQueues, gatherExchanges}
 
 var sampleConfig = `
   ## Management Plugin url. (default: http://localhost:15672)
@@ -208,6 +235,15 @@ var sampleConfig = `
   ## A list of queues to gather as the rabbitmq_queue measurement. If not
   ## specified, metrics for all queues are gathered.
   # queues = ["telegraf"]
+
+  ## A list of exchanges to gather as the rabbitmq_exchange measurement. If not
+  ## specified, metrics for all exchanges are gathered.
+  # exchanges = ["telegraf"]
+
+  ## Queues to include and exclude. Globs accepted.
+  ## Note that an empty array for both will include all queues
+  queue_name_include = []
+  queue_name_exclude = []
 `
 
 // SampleConfig ...
@@ -236,6 +272,15 @@ func (r *RabbitMQ) Gather(acc telegraf.Accumulator) error {
 			Transport: tr,
 			Timeout:   r.ClientTimeout.Duration,
 		}
+	}
+
+	// Create queue filter if not already created
+	if !r.filterCreated {
+		err := r.createQueueFilter()
+		if err != nil {
+			return err
+		}
+		r.filterCreated = true
 	}
 
 	var wg sync.WaitGroup
@@ -295,9 +340,18 @@ func gatherOverview(r *RabbitMQ, acc telegraf.Accumulator) {
 		return
 	}
 
-	if overview.QueueTotals == nil || overview.ObjectTotals == nil || overview.MessageStats == nil {
+	if overview.QueueTotals == nil || overview.ObjectTotals == nil || overview.MessageStats == nil || overview.Listeners == nil {
 		acc.AddError(fmt.Errorf("Wrong answer from rabbitmq. Probably auth issue"))
 		return
+	}
+
+	var clustering_listeners, amqp_listeners int64 = 0, 0
+	for _, listener := range overview.Listeners {
+		if listener.Protocol == "clustering" {
+			clustering_listeners++
+		} else if listener.Protocol == "amqp" {
+			amqp_listeners++
+		}
 	}
 
 	tags := map[string]string{"url": r.URL}
@@ -305,17 +359,20 @@ func gatherOverview(r *RabbitMQ, acc telegraf.Accumulator) {
 		tags["name"] = r.Name
 	}
 	fields := map[string]interface{}{
-		"messages":           overview.QueueTotals.Messages,
-		"messages_ready":     overview.QueueTotals.MessagesReady,
-		"messages_unacked":   overview.QueueTotals.MessagesUnacknowledged,
-		"channels":           overview.ObjectTotals.Channels,
-		"connections":        overview.ObjectTotals.Connections,
-		"consumers":          overview.ObjectTotals.Consumers,
-		"exchanges":          overview.ObjectTotals.Exchanges,
-		"queues":             overview.ObjectTotals.Queues,
-		"messages_acked":     overview.MessageStats.Ack,
-		"messages_delivered": overview.MessageStats.Deliver,
-		"messages_published": overview.MessageStats.Publish,
+		"messages":               overview.QueueTotals.Messages,
+		"messages_ready":         overview.QueueTotals.MessagesReady,
+		"messages_unacked":       overview.QueueTotals.MessagesUnacknowledged,
+		"channels":               overview.ObjectTotals.Channels,
+		"connections":            overview.ObjectTotals.Connections,
+		"consumers":              overview.ObjectTotals.Consumers,
+		"exchanges":              overview.ObjectTotals.Exchanges,
+		"queues":                 overview.ObjectTotals.Queues,
+		"messages_acked":         overview.MessageStats.Ack,
+		"messages_delivered":     overview.MessageStats.Deliver,
+		"messages_delivered_get": overview.MessageStats.DeliverGet,
+		"messages_published":     overview.MessageStats.Publish,
+		"clustering_listeners":   clustering_listeners,
+		"amqp_listeners":         amqp_listeners,
 	}
 	acc.AddFields("rabbitmq_overview", fields, tags)
 }
@@ -338,6 +395,11 @@ func gatherNodes(r *RabbitMQ, acc telegraf.Accumulator) {
 		tags := map[string]string{"url": r.URL}
 		tags["node"] = node.Name
 
+		var running int64 = 0
+		if node.Running {
+			running = 1
+		}
+
 		fields := map[string]interface{}{
 			"disk_free":       node.DiskFree,
 			"disk_free_limit": node.DiskFreeLimit,
@@ -350,12 +412,16 @@ func gatherNodes(r *RabbitMQ, acc telegraf.Accumulator) {
 			"run_queue":       node.RunQueue,
 			"sockets_total":   node.SocketsTotal,
 			"sockets_used":    node.SocketsUsed,
+			"running":         running,
 		}
 		acc.AddFields("rabbitmq_node", fields, tags, now)
 	}
 }
 
 func gatherQueues(r *RabbitMQ, acc telegraf.Accumulator) {
+	if r.excludeEveryQueue {
+		return
+	}
 	// Gather information about queues
 	queues := make([]Queue, 0)
 	err := r.requestJSON("/api/queues", &queues)
@@ -365,7 +431,7 @@ func gatherQueues(r *RabbitMQ, acc telegraf.Accumulator) {
 	}
 
 	for _, queue := range queues {
-		if !r.shouldGatherQueue(queue) {
+		if !r.queueFilter.Match(queue.Name) {
 			continue
 		}
 		tags := map[string]string{
@@ -410,6 +476,40 @@ func gatherQueues(r *RabbitMQ, acc telegraf.Accumulator) {
 	}
 }
 
+func gatherExchanges(r *RabbitMQ, acc telegraf.Accumulator) {
+	// Gather information about exchanges
+	exchanges := make([]Exchange, 0)
+	err := r.requestJSON("/api/exchanges", &exchanges)
+	if err != nil {
+		acc.AddError(err)
+		return
+	}
+
+	for _, exchange := range exchanges {
+		if !r.shouldGatherExchange(exchange) {
+			continue
+		}
+		tags := map[string]string{
+			"url":         r.URL,
+			"exchange":    exchange.Name,
+			"type":        exchange.Type,
+			"vhost":       exchange.Vhost,
+			"internal":    strconv.FormatBool(exchange.Internal),
+			"durable":     strconv.FormatBool(exchange.Durable),
+			"auto_delete": strconv.FormatBool(exchange.AutoDelete),
+		}
+
+		acc.AddFields(
+			"rabbitmq_exchange",
+			map[string]interface{}{
+				"messages_publish_in":  exchange.MessageStats.PublishIn,
+				"messages_publish_out": exchange.MessageStats.PublishOut,
+			},
+			tags,
+		)
+	}
+}
+
 func (r *RabbitMQ) shouldGatherNode(node Node) bool {
 	if len(r.Nodes) == 0 {
 		return true
@@ -424,18 +524,37 @@ func (r *RabbitMQ) shouldGatherNode(node Node) bool {
 	return false
 }
 
-func (r *RabbitMQ) shouldGatherQueue(queue Queue) bool {
-	if len(r.Queues) == 0 {
+func (r *RabbitMQ) createQueueFilter() error {
+	// Backwards compatibility for deprecated `queues` parameter.
+	if len(r.Queues) > 0 {
+		r.QueueInclude = append(r.QueueInclude, r.Queues...)
+	}
+
+	filter, err := filter.NewIncludeExcludeFilter(r.QueueInclude, r.QueueExclude)
+	if err != nil {
+		return err
+	}
+	r.queueFilter = filter
+
+	for _, q := range r.QueueExclude {
+		if q == "*" {
+			r.excludeEveryQueue = true
+		}
+	}
+
+	return nil
+}
+
+func (r *RabbitMQ) shouldGatherExchange(exchange Exchange) bool {
+	if len(r.Exchanges) == 0 {
 		return true
 	}
 
-	for _, name := range r.Queues {
-		if name == queue.Name {
+	for _, name := range r.Exchanges {
+		if name == exchange.Name {
 			return true
 		}
 	}
 
 	return false
 }
-
-

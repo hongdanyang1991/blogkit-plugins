@@ -2,26 +2,29 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
+	"flag"
 	"fmt"
 	"net"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
-	"encoding/json"
-	"flag"
 
-	"github.com/qiniu/log"
-	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf"
-	"github.com/hongdanyang1991/blogkit-plugins/common/utils"
+	"context"
+	"crypto/tls"
+	"github.com/hongdanyang1991/blogkit-plugins/common"
 	"github.com/hongdanyang1991/blogkit-plugins/common/conf"
-	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/models"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf"
 	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/agent"
+	"github.com/hongdanyang1991/blogkit-plugins/common/telegraf/models"
+	"github.com/hongdanyang1991/blogkit-plugins/common/utils"
+	"github.com/qiniu/log"
 )
 
 var zookeeperConf = flag.String("f", "conf/zookeeper.conf", "configuration file to load")
 var logPath = flag.String("l", "log/zookeeper", "configuration file to log")
+
 var zookeeper = &Zookeeper{}
 
 func init() {
@@ -52,10 +55,19 @@ func main() {
 
 }
 
-
 // Zookeeper is a zookeeper plugin
 type Zookeeper struct {
 	Servers []string
+	Timeout common.Duration
+
+	EnableSSL          bool   `json:"enable_ssl"`
+	SSLCA              string `json:"ssl_ca"`
+	SSLCert            string `json:"ssl_cert"`
+	SSLKey             string `json:"ssl_key"`
+	InsecureSkipVerify bool   `json:"insecure_skip_verify"`
+
+	initialized bool
+	tlsConfig   *tls.Config
 }
 
 var sampleConfig = `
@@ -65,9 +77,20 @@ var sampleConfig = `
   ## If no servers are specified, then localhost is used as the host.
   ## If no port is specified, 2181 is used
   servers = [":2181"]
+
+  ## Timeout for metric collections from all servers.  Minimum timeout is "1s".
+  # timeout = "5s"
+
+  ## Optional SSL Config
+  # enable_ssl = true
+  # ssl_ca = "/etc/telegraf/ca.pem"
+  # ssl_cert = "/etc/telegraf/cert.pem"
+  # ssl_key = "/etc/telegraf/key.pem"
+  ## If false, skip chain & host verification
+  # insecure_skip_verify = true
 `
 
-var defaultTimeout = time.Second * time.Duration(5)
+var defaultTimeout = 5 * time.Second
 
 // SampleConfig returns sample configuration message
 func (z *Zookeeper) SampleConfig() string {
@@ -79,34 +102,68 @@ func (z *Zookeeper) Description() string {
 	return `Reads 'mntr' stats from one or many zookeeper servers`
 }
 
+func (z *Zookeeper) dial(ctx context.Context, addr string) (net.Conn, error) {
+	var dialer net.Dialer
+	if z.EnableSSL {
+		deadline, ok := ctx.Deadline()
+		if ok {
+			dialer.Deadline = deadline
+		}
+		return tls.DialWithDialer(&dialer, "tcp", addr, z.tlsConfig)
+	} else {
+		return dialer.DialContext(ctx, "tcp", addr)
+	}
+}
+
 // Gather reads stats from all configured servers accumulates stats
 func (z *Zookeeper) Gather(acc telegraf.Accumulator) error {
+	ctx := context.Background()
+
+	if !z.initialized {
+		tlsConfig, err := common.GetTLSConfig(
+			z.SSLCert, z.SSLKey, z.SSLCA, z.InsecureSkipVerify)
+		if err != nil {
+			return err
+		}
+		z.tlsConfig = tlsConfig
+		z.initialized = true
+	}
+
+	if z.Timeout.Duration < 1*time.Second {
+		z.Timeout.Duration = defaultTimeout
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, z.Timeout.Duration)
+	defer cancel()
+
 	if len(z.Servers) == 0 {
 		z.Servers = []string{":2181"}
 	}
 
 	for _, serverAddress := range z.Servers {
-		acc.AddError(z.gatherServer(serverAddress, acc))
+		acc.AddError(z.gatherServer(ctx, serverAddress, acc))
 	}
 	return nil
 }
 
-func (z *Zookeeper) gatherServer(address string, acc telegraf.Accumulator) error {
+func (z *Zookeeper) gatherServer(ctx context.Context, address string, acc telegraf.Accumulator) error {
 	var zookeeper_state string
 	_, _, err := net.SplitHostPort(address)
 	if err != nil {
 		address = address + ":2181"
 	}
 
-	c, err := net.DialTimeout("tcp", address, defaultTimeout)
+	c, err := z.dial(ctx, address)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
 		return err
 	}
 	defer c.Close()
 
-	// Extend connection
-	c.SetDeadline(time.Now().Add(defaultTimeout))
+	// Apply deadline to connection
+	deadline, ok := ctx.Deadline()
+	if ok {
+		c.SetDeadline(deadline)
+	}
 
 	fmt.Fprintf(c, "%s\n", "mntr")
 	rdr := bufio.NewReader(c)
@@ -151,4 +208,3 @@ func (z *Zookeeper) gatherServer(address string, acc telegraf.Accumulator) error
 
 	return nil
 }
-
