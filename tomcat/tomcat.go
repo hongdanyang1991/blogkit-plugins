@@ -39,8 +39,15 @@ func main() {
 	tomcat.Gather(acc)
 	datas := []map[string]interface{}{}
 
-	for _, metric := range acc.Metrics {
+	/*for _, metric := range acc.Metrics {
 		datas = append(datas, metric.Fields())
+	}*/
+	for _, metric := range acc.Metrics {
+		fields := metric.Fields()
+		for tagKey, tagVal := range metric.Tags() {
+			fields[tagKey] = tagVal
+		}
+		datas = append(datas, fields)
 	}
 	data, err := json.Marshal(datas)
 	if err != nil {
