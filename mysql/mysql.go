@@ -54,10 +54,10 @@ func main() {
 	datas := []map[string]interface{}{}
 
 	/*
-	//log.Println(acc.Metrics)
-	for _, metric := range acc.Metrics {
-		datas = append(datas, metric.Fields())
-	}
+		//log.Println(acc.Metrics)
+		for _, metric := range acc.Metrics {
+			datas = append(datas, metric.Fields())
+		}
 	*/
 	for _, metric := range acc.Metrics {
 		fields := metric.Fields()
@@ -102,9 +102,9 @@ type Mysql struct {
 
 	Version                string `json:"version"`
 	GatherGlobalStatus     bool   `json:"gather_global_status"`
-	EventCollectionEnable  bool
-	GatherEventsStatements bool `json:"gather_events_statements"`
-	GatherEventsStages     bool `json:"gather_events_stages"`
+	EventCollectionEnable  bool   `json:"event_collection_enable"` //标识mysql数据库是否开启event查询
+	GatherEventsStatements bool   `json:"gather_events_statements"`
+	GatherEventsStages     bool   `json:"gather_events_stages"`
 
 	LastGatherStatementsEndTime string `json:"last_gather_statements_end_time"`
 	LastGatherStagesEndTime     string `json:"last_gather_stages_end_time"`
@@ -500,7 +500,7 @@ const (
 			from performance_schema.events_statements_history_long where digest_text is not null and current_schema is not null) a where a.end_time > ? ) statements left join performance_schema.events_stages_history_long stages
 		on statements.event_id = stages.nesting_event_id where stages.event_name is not null and stages.timer_wait is not null order by statements.end_time
 	`
-	eventStatementsQuery_old = `
+	/*eventStatementsQuery_old = `
 		select statements.*,pro.processlist_user,pro.processlist_host,pro.processlist_db from
 			(select a.start_time,a.end_time,a.thread_id,a.event_id,a.sql_time,a.digest_text,a.digest from
 				(select date_sub(now(),INTERVAL (select VARIABLE_VALUE from information_schema.global_status where variable_name='UPTIME')-TIMER_START*10e-13 second) start_time
@@ -513,6 +513,24 @@ const (
 				,digest
 			from performance_schema.events_statements_history_long where digest_text is not null and current_schema is not null) a where a.end_time > ? ) statements left join performance_schema.threads pro
 		on statements.thread_id = pro.thread_id where pro.processlist_user is not null order by statements.end_time
+	`*/
+
+	eventStatementsQuery_old = `
+		select statements.*, pro.processlist_user,pro.processlist_host,pro.processlist_db from
+		(select a.startTime,a.endTime,ifnull(a.current_schema, 'NONE') as databaseName, a.thread_id,a.event_id,a.executionTime,a.digest_text,a.digest,a.sql_text from
+			(select
+			date_sub(now(),INTERVAL (select VARIABLE_VALUE from information_schema.global_status where variable_name='UPTIME')-TIMER_START*10e-13 second) startTime
+			,date_sub(now(),INTERVAL (select VARIABLE_VALUE from information_schema.global_status where variable_name='UPTIME')-TIMER_END*10e-13 second) endTime
+			,thread_id
+			,event_id
+			,current_schema
+			,event_name
+			,sql_text
+			,timer_wait  executionTime
+			,digest_text
+			,digest
+			from performance_schema.events_statements_history_long where digest_text is not null and current_schema not in ('mysql','performance_schema','information_schema')and event_name in ('statement/sql/select', 'statement/sql/update','statement/sql/insert','statement/sql/delete') ) a where a.endTime > ?) statements left join performance_schema.threads pro
+on statements.thread_id = pro.thread_id where pro.processlist_user is not null order by statements.startTime
 	`
 
 	eventStagesQuery = `
@@ -529,7 +547,7 @@ const (
 			from performance_schema.events_statements_history_long where digest_text is not null and current_schema is not null) a where a.end_time > ? ) statements left join performance_schema.events_stages_history_long stages
 		on statements.event_id = stages.nesting_event_id where stages.event_name is not null and stages.timer_wait is not null order by statements.end_time
 	`
-	eventStatementsQuery = `
+	/*eventStatementsQuery = `
 		select statements.*,pro.processlist_user,pro.processlist_host,pro.processlist_db from
 			(select a.start_time,a.end_time,a.thread_id,a.event_id,a.sql_time,a.digest_text,a.digest from
 				(select date_sub(now(),INTERVAL (select VARIABLE_VALUE from performance_schema.global_status where variable_name='UPTIME')-TIMER_START*10e-13 second) start_time
@@ -542,6 +560,25 @@ const (
 				,digest
 			from performance_schema.events_statements_history_long where digest_text is not null and current_schema is not null) a where a.end_time > ? ) statements left join performance_schema.threads pro
 		on statements.thread_id = pro.thread_id where pro.processlist_user is not null order by statements.end_time
+	`*/
+
+	eventStatementsQuery = `
+		select statements.*, pro.processlist_user,pro.processlist_host,pro.processlist_db from
+
+(select a.startTime,a.endTime,ifnull(a.current_schema, 'NONE') as databaseName, a.thread_id,a.event_id,a.executionTime,a.digest_text,a.digest,a.sql_text from
+			(select
+			date_sub(now(),INTERVAL (select VARIABLE_VALUE from performance_schema.global_status where variable_name='UPTIME')-TIMER_START*10e-13 second) startTime
+			,date_sub(now(),INTERVAL (select VARIABLE_VALUE from performance_schema.global_status where variable_name='UPTIME')-TIMER_END*10e-13 second) endTime
+			,thread_id
+			,event_id
+			,current_schema
+			,event_name
+			,sql_text
+			,timer_wait  executionTime
+			,digest_text
+			,digest
+			from performance_schema.events_statements_history_long where digest_text is not null and current_schema not in ('mysql','performance_schema','information_schema')and event_name in ('statement/sql/select', 'statement/sql/update','statement/sql/insert','statement/sql/delete') ) a where a.endTime > ?) statements left join performance_schema.threads pro
+on statements.thread_id = pro.thread_id where pro.processlist_user is not null order by statements.startTime
 	`
 )
 
@@ -892,10 +929,10 @@ func (m *Mysql) gatherGlobalStatuses(db *sql.DB, serv string, acc telegraf.Accum
 				}
 			}
 			// Send 20 fields at a time
-			if len(fields) >= 20 {
+			/*if len(fields) >= 20 {
 				acc.AddFields("mysql", fields, tags)
 				fields = make(map[string]interface{})
-			}
+			}*/
 			if found {
 				continue
 			}
@@ -953,10 +990,10 @@ func (m *Mysql) gatherGlobalStatuses(db *sql.DB, serv string, acc telegraf.Accum
 		}
 
 		// Send 20 fields at a time
-		if len(fields) >= 20 {
+		/*if len(fields) >= 20 {
 			acc.AddFields("mysql", fields, tags)
 			fields = make(map[string]interface{})
-		}
+		}*/
 	}
 	// Send any remaining fields
 	if len(fields) > 0 {
@@ -1956,11 +1993,13 @@ func (m *Mysql) gatherEventsStatements(db *sql.DB, serv string, acc telegraf.Acc
 	var (
 		start_time       string
 		end_time         string
+		current_schema   string
 		thread_id        uint64
 		event_id         uint64
-		sql_time         uint64
+		execution_time   uint64
 		digest_text      string
 		digest           string
+		sql_text         string
 		processlist_user string
 		processlist_host string
 		processlist_db   string
@@ -1968,9 +2007,10 @@ func (m *Mysql) gatherEventsStatements(db *sql.DB, serv string, acc telegraf.Acc
 	var servtag string
 	servtag = getDSNTag(serv)
 
+	rowCount := 0
 	for rows.Next() {
 
-		err = rows.Scan(&start_time, &end_time, &thread_id, &event_id, &sql_time, &digest_text, &digest, &processlist_user, &processlist_host, &processlist_db)
+		err = rows.Scan(&start_time, &end_time, &current_schema, &thread_id, &event_id, &execution_time, &digest_text, &digest, &sql_text, &processlist_user, &processlist_host, &processlist_db)
 		if err != nil {
 			return err
 		}
@@ -1980,20 +2020,27 @@ func (m *Mysql) gatherEventsStatements(db *sql.DB, serv string, acc telegraf.Acc
 			//measurement:		"events_statement",
 			"start_time":       start_time,
 			"end_time":         end_time,
+			"current_schema":   current_schema,
 			"thread_id":        thread_id,
 			"event_id":         event_id,
-			"sql_time":         sql_time,
+			"execution_time":   execution_time,
 			"digest_text":      digest_text,
 			"digest":           digest,
+			"sql_text":         sql_text,
 			"processlist_user": processlist_user,
 			"processlist_host": processlist_host,
 			"processlist_db":   processlist_db,
 		}
 		tags := map[string]string{}
 		acc.AddFields("eventStatement", fields, tags)
+		rowCount++
 	}
-	if start_time != "" {
+	if rowCount > 0 {
+		//更新查询开始时间
 		m.LastGatherStatementsEndTime = end_time
+	} else {
+		//未查到数据,重新设置event_collection_enable为未开启
+		m.EventCollectionEnable = false
 	}
 
 	return nil
@@ -2051,7 +2098,11 @@ func (m *Mysql) gatherEventsStages(db *sql.DB, serv string, acc telegraf.Accumul
 		acc.AddFields("eventStage", fields, tags)
 	}
 	if end_time != "" {
+		//更新查询开始时间
 		m.LastGatherStagesEndTime = end_time
+	} else {
+		//未查到数据,重新设置event_collection_enable为未开启
+		m.EventCollectionEnable = false
 	}
 	return nil
 }
