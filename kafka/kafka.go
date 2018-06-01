@@ -35,7 +35,10 @@ func main() {
 	metrics := []telegraf.Metric{}
 	input := models.NewRunningInput(kafka, &models.InputConfig{})
 	acc := agent.NewAccumulator(input, metrics)
-	kafka.Gather(acc)
+	err := kafka.Gather(acc)
+	if err != nil {
+		log.Errorf("collect kafka metric error:", err)
+	}
 	datas := []map[string]interface{}{}
 
 	/*for _, metric := range acc.Metrics {

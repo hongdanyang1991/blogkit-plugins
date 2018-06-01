@@ -36,7 +36,13 @@ func main() {
 	metrics := []telegraf.Metric{}
 	input := models.NewRunningInput(tomcat, &models.InputConfig{})
 	acc := agent.NewAccumulator(input, metrics)
-	tomcat.Gather(acc)
+	err := tomcat.Gather(acc)
+	if err != nil {
+		log.Errorf("collect tomcat metric error:", err)
+	}
+	if err != nil {
+
+	}
 	datas := []map[string]interface{}{}
 
 	/*for _, metric := range acc.Metrics {

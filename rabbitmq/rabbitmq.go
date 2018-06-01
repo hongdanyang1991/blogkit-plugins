@@ -36,7 +36,10 @@ func main() {
 	metrics := []telegraf.Metric{}
 	input := models.NewRunningInput(rabbitmq, &models.InputConfig{})
 	acc := agent.NewAccumulator(input, metrics)
-	rabbitmq.Gather(acc)
+	err := rabbitmq.Gather(acc)
+	if err != nil {
+		log.Errorf("collect rabbitmq metric error:", err)
+	}
 	datas := []map[string]interface{}{}
 
 	/*for _, metric := range acc.Metrics {

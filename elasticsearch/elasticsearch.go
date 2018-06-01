@@ -39,7 +39,10 @@ func main() {
 	metrics := []telegraf.Metric{}
 	input := models.NewRunningInput(elastic, &models.InputConfig{})
 	acc := agent.NewAccumulator(input, metrics)
-	elastic.Gather(acc)
+	err := elastic.Gather(acc)
+	if err != nil {
+		log.Errorf("collect elasticsearch metric error:", err)
+	}
 	datas := []map[string]interface{}{}
 
 	//log.Println(acc.Metrics)

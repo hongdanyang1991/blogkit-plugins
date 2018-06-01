@@ -40,7 +40,10 @@ func main() {
 	metrics := []telegraf.Metric{}
 	input := models.NewRunningInput(r, &models.InputConfig{})
 	acc := agent.NewAccumulator(input, metrics)
-	r.Gather(acc)
+	err := r.Gather(acc)
+	if err != nil {
+		log.Errorf("collect redis metric error:", err)
+	}
 	datas := []map[string]interface{}{}
 
 	/*for _, metric := range acc.Metrics {

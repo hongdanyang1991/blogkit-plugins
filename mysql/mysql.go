@@ -50,7 +50,10 @@ func main() {
 	metrics := []telegraf.Metric{}
 	input := models.NewRunningInput(m, &models.InputConfig{})
 	acc := agent.NewAccumulator(input, metrics)
-	m.Gather(acc)
+	err := m.Gather(acc)
+	if err != nil {
+		log.Errorf("collect mysql metric error:", err)
+	}
 	datas := []map[string]interface{}{}
 
 	/*

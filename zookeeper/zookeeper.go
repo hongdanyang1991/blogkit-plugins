@@ -40,7 +40,10 @@ func main() {
 	metrics := []telegraf.Metric{}
 	input := models.NewRunningInput(zookeeper, &models.InputConfig{})
 	acc := agent.NewAccumulator(input, metrics)
-	zookeeper.Gather(acc)
+	err := zookeeper.Gather(acc)
+	if err != nil {
+		log.Errorf("collect zookeeper metric error:", err)
+	}
 	datas := []map[string]interface{}{}
 
 	/*for _, metric := range acc.Metrics {
