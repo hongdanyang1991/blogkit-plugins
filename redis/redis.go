@@ -256,7 +256,7 @@ func gatherInfoOutput(
 			}
 		}
 
-		if strings.HasPrefix(name, "master_replid") {
+		if strings.HasPrefix(name, "main_replid") {
 			continue
 		}
 
