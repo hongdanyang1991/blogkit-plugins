@@ -122,7 +122,7 @@ type clusterStats struct {
 	Nodes       interface{} `json:"nodes"`
 }
 
-type catMaster struct {
+type catMain struct {
 	NodeID   string `json:"id"`
 	NodeIP   string `json:"ip"`
 	NodeName string `json:"node"`
@@ -152,7 +152,7 @@ const sampleConfig = `
   # cluster_health_level = "indices"
 
   ## Set cluster_stats to true when you want to also obtain cluster stats from the
-  ## Master node.
+  ## Main node.
   cluster_stats = false
 
   ## node_stats is a list of sub-stats that you want to have gathered. Valid options
@@ -183,8 +183,8 @@ type Elasticsearch struct {
 	SSLKey                  string `json:"ssl_key"`  // Path to cert key file
 	InsecureSkipVerify      bool   // Use SSL but skip chain & host verification
 	client                  *http.Client
-	catMasterResponseTokens []string
-	isMaster                bool
+	catMainResponseTokens []string
+	isMain                bool
 }
 
 // NewElasticsearch return a new instance of Elasticsearch
@@ -237,12 +237,12 @@ func (e *Elasticsearch) Gather(acc telegraf.Accumulator) error {
 		go func(s string, acc telegraf.Accumulator) {
 			defer wg.Done()
 			url := e.nodeStatsUrl(s)
-			e.isMaster = false
+			e.isMain = false
 
 			if e.ClusterStats {
-				// get cat/master information here so NodeStats can determine
-				// whether this node is the Master
-				if err := e.setCatMaster(s + "/_cat/master"); err != nil {
+				// get cat/main information here so NodeStats can determine
+				// whether this node is the Main
+				if err := e.setCatMain(s + "/_cat/main"); err != nil {
 					acc.AddError(fmt.Errorf(mask.ReplaceAllString(err.Error(), "http(s)://XXX:XXX@")))
 					return
 				}
@@ -265,7 +265,7 @@ func (e *Elasticsearch) Gather(acc telegraf.Accumulator) error {
 				}
 			}
 
-			if e.ClusterStats && e.isMaster {
+			if e.ClusterStats && e.isMain {
 				if err := e.gatherClusterStats(s+"/_cluster/stats", acc); err != nil {
 					acc.AddError(fmt.Errorf(mask.ReplaceAllString(err.Error(), "http(s)://XXX:XXX@")))
 					return
@@ -329,8 +329,8 @@ func (e *Elasticsearch) gatherNodeStats(url string, acc telegraf.Accumulator) er
 		}
 
 		if e.ClusterStats {
-			// check for master
-			e.isMaster = (id == e.catMasterResponseTokens[0])
+			// check for main
+			e.isMain = (id == e.catMainResponseTokens[0])
 		}
 
 		for k, v := range n.Attributes {
@@ -445,7 +445,7 @@ func (e *Elasticsearch) gatherClusterStats(url string, acc telegraf.Accumulator)
 	return nil
 }
 
-func (e *Elasticsearch) setCatMaster(url string) error {
+func (e *Elasticsearch) setCatMain(url string) error {
 	r, err := e.client.Get(url)
 	if err != nil {
 		return err
@@ -455,7 +455,7 @@ func (e *Elasticsearch) setCatMaster(url string) error {
 		// NOTE: we are not going to read/discard r.Body under the assumption we'd prefer
 		// to let the underlying transport close the connection and re-establish a new one for
 		// future calls.
-		return fmt.Errorf("elasticsearch: Unable to retrieve master node information. API responded with status-code %d, expected %d", r.StatusCode, http.StatusOK)
+		return fmt.Errorf("elasticsearch: Unable to retrieve main node information. API responded with status-code %d, expected %d", r.StatusCode, http.StatusOK)
 	}
 	response, err := ioutil.ReadAll(r.Body)
 
@@ -463,7 +463,7 @@ func (e *Elasticsearch) setCatMaster(url string) error {
 		return err
 	}
 
-	e.catMasterResponseTokens = strings.Split(string(response), " ")
+	e.catMainResponseTokens = strings.Split(string(response), " ")
 
 	return nil
 }
